@@ -1,1 +1,1 @@
-# serve-owl-vit
+# Serve OWL-ViT
