@@ -1,0 +1,27 @@
+[
+    {
+        "Model": "OWL-ViT base patch 32",
+        "Backbone": "ViT-B/32",
+        "Pretraining": "CLIP",
+        "Size": "583 MB",
+        "LVIS AP": "19.3",
+        "LVIS APr": "16.9"
+    },
+    {
+        "Model": "OWL-ViT base patch 16",
+        "Backbone": "ViT-B/16",
+        "Pretraining": "CLIP",
+        "Size": "581 MB",
+        "LVIS AP": "20.8",
+        "LVIS APr": "17.1"
+    },
+    {
+        "Model": "OWL-ViT large patch 14",
+        "Backbone": "ViT-L/14",
+        "Pretraining": "CLIP",
+        "Size": "1.65 GB",
+        "LVIS AP": "34.6",
+        "LVIS APr": "31.2"
+    }
+
+]

@@ -1,0 +1,4 @@
+# text prompt (must be a list of strings)
+text_queries: ["enter_text"]
+# prediction confidence threshold
+confidence_threshold: 0.3

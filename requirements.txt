@@ -1,0 +1,3 @@
+supervisely
+transformers
+torch
