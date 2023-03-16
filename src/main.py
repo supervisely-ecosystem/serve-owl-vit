@@ -75,7 +75,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
         results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
         # postprocess model predictions
         predictions = []
-        confidence_threshold = settings.get("confidence_threshold", 0.3)
+        confidence_threshold = settings.get("confidence_threshold", 0.1)
         for i in range(len(text_queries)):
             boxes, scores, labels = results[i]["boxes"], results[i]["scores"], results[i]["labels"]
             for box, score, label in zip(boxes, scores, labels):
