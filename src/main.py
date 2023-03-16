@@ -77,7 +77,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                 if not self._model_meta.get_obj_class(class_name):
                     self.class_names.append(class_name)
                     new_class = sly.ObjClass(class_name, sly.Rectangle, colors[i])
-                    self._model_meta.add_obj_class(new_class)
+                    self._model_meta = self._model_meta.add_obj_class(new_class)
         # get model outputs
         with torch.no_grad():
             outputs = self.model(**inputs)
