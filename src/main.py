@@ -54,6 +54,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
 
     def get_info(self):
         info = super().get_info()
+        info["task type"] = "prompt-based object detection"
         info["videos_support"] = False
         info["async_video_inference_support"] = False
         return info
