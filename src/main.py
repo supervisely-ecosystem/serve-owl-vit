@@ -82,7 +82,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                 if score >= confidence_threshold:
                     box = box.cpu().detach().numpy()
                     # convert box coordinates from COCO to Supervisely format
-                    box = [box[1], box[0], box[1] + box[3], box[0] + box[2]]
+                    box = [box[1], box[0], box[3], box[2]]
                     predictions.append(
                         sly.nn.PredictionBBox(
                             class_name=self.class_names[0], bbox_tlbr=box, score=score.item()
