@@ -70,7 +70,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
         # get model outputs
         with torch.no_grad():
             outputs = self.model(**inputs)
-        target_sizes = torch.Tensor([image.shape[:2]])
+        target_sizes = torch.Tensor([image.shape[:2]]).to(self.device)
         # convert outputs (bounding boxes and class logits) to COCO API
         results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
         # postprocess model predictions
