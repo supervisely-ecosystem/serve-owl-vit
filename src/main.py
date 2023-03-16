@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
 import torch
+from supervisely.imaging.color import get_predefined_colors
 
 
 load_dotenv("local.env")
@@ -67,6 +68,15 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
         inputs = self.processor(text=text_queries, images=image, return_tensors="pt").to(
             self.device
         )
+        if sly.is_production():
+            # add object classes to model meta if necessary
+            colors = get_predefined_colors(len(text_queries))
+            for i, text_query in enumerate(text_queries):
+                class_name = text_query.replace(" ", "_")
+                if not self._model_meta.get_obj_class(class_name):
+                    self.class_names.append(class_name)
+                    new_class = sly.ObjClass(class_name, sly.Rectangle, colors[i])
+                    self._model_meta.add_obj_class(new_class)
         # get model outputs
         with torch.no_grad():
             outputs = self.model(**inputs)
@@ -83,9 +93,15 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                     box = box.cpu().detach().numpy()
                     # convert box coordinates from COCO to Supervisely format
                     box = [box[1], box[0], box[3], box[2]]
+                    label = text_queries[label.item()]
+                    label = label.replace(" ", "_")
+                    if sly.is_production():
+                        class_name = label
+                    else:
+                        class_name = self.class_names[0]
                     predictions.append(
                         sly.nn.PredictionBBox(
-                            class_name=self.class_names[0], bbox_tlbr=box, score=score.item()
+                            class_name=class_name, bbox_tlbr=box, score=score.item()
                         )
                     )
         return predictions
