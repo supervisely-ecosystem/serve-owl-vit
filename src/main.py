@@ -87,24 +87,21 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
         # postprocess model predictions
         predictions = []
         confidence_threshold = settings.get("confidence_threshold", 0.1)
-        for i in range(len(text_queries)):
-            boxes, scores, labels = results[i]["boxes"], results[i]["scores"], results[i]["labels"]
-            for box, score, label in zip(boxes, scores, labels):
-                if score >= confidence_threshold:
-                    box = box.cpu().detach().numpy()
-                    # convert box coordinates from COCO to Supervisely format
-                    box = [box[1], box[0], box[3], box[2]]
-                    label = text_queries[label.item()]
-                    label = label.replace(" ", "_")
-                    if sly.is_production():
-                        class_name = label
-                    else:
-                        class_name = self.class_names[0]
-                    predictions.append(
-                        sly.nn.PredictionBBox(
-                            class_name=class_name, bbox_tlbr=box, score=score.item()
-                        )
-                    )
+        boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
+        for box, score, label in zip(boxes, scores, labels):
+            if score >= confidence_threshold:
+                box = box.cpu().detach().numpy()
+                # convert box coordinates from COCO to Supervisely format
+                box = [box[1], box[0], box[3], box[2]]
+                label = text_queries[label.item()]
+                label = label.replace(" ", "_")
+                if sly.is_production():
+                    class_name = label
+                else:
+                    class_name = self.class_names[0]
+                predictions.append(
+                    sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
+                )
         return predictions
 
 
