@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
 import torch
-from supervisely.imaging.color import get_predefined_colors
 
 
 load_dotenv("local.env")
@@ -27,6 +26,15 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
     def get_models(self):
         model_data = sly.json.load_json_file(model_data_path)
         return model_data
+
+    @property
+    def model_meta(self):
+        if self._model_meta is None:
+            self._model_meta = sly.ProjectMeta(
+                [sly.ObjClass(self.class_names[0], sly.Rectangle, [255, 0, 0])]
+            )
+            self._get_confidence_tag_meta()
+        return self._model_meta
 
     def load_on_device(
         self,
@@ -71,12 +79,11 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
         )
         if sly.is_production():
             # add object classes to model meta if necessary
-            colors = get_predefined_colors(len(text_queries))
-            for i, text_query in enumerate(text_queries):
+            for text_query in text_queries:
                 class_name = text_query.replace(" ", "_")
                 if not self._model_meta.get_obj_class(class_name):
                     self.class_names.append(class_name)
-                    new_class = sly.ObjClass(class_name, sly.Rectangle, colors[i])
+                    new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
                     self._model_meta = self._model_meta.add_obj_class(new_class)
         # get model outputs
         with torch.no_grad():
