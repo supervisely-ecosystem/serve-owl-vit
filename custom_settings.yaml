@@ -1,4 +1,13 @@
-# text prompt (must be a list of strings)
-text_queries: ["enter_text"]
+# inference mode (can be text_prompt or reference_image)
+mode: text_prompt
+# text prompt (will be used only in text_prompt mode)
+text_queries:
+- enter_text
+# reference image id (will be used only in reference_image mode)
+reference_image_id: None
+# object class name for labels (will be used only in reference_image mode)
+reference_class_name: None
+# non-max suppression threshold (will be used only in reference_image mode)
+nms_threshold: 0.3
 # prediction confidence threshold
 confidence_threshold: 0.1

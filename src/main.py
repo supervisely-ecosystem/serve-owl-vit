@@ -20,6 +20,7 @@ load_dotenv("local.env")
 load_dotenv(os.path.expanduser("~/supervisely.env"))
 root_source_path = str(Path(__file__).parents[1])
 model_data_path = os.path.join(root_source_path, "models", "model_data.json")
+api = sly.Api()
 
 
 class OWLViTModel(sly.nn.inference.ObjectDetection):
@@ -73,39 +74,67 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
     def predict(self, image_path: str, settings: Dict[str, Any]) -> List[sly.nn.PredictionBBox]:
         # prepare input data
         image = sly.image.read(image_path)
-        text_queries = settings.get("text_queries")
-        inputs = self.processor(text=text_queries, images=image, return_tensors="pt").to(
-            self.device
-        )
-        if sly.is_production():
-            # add object classes to model meta if necessary
-            for text_query in text_queries:
-                class_name = text_query.replace(" ", "_")
-                if not self._model_meta.get_obj_class(class_name):
-                    self.class_names.append(class_name)
-                    new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
-                    self._model_meta = self._model_meta.add_obj_class(new_class)
-        # get model outputs
-        with torch.no_grad():
-            outputs = self.model(**inputs)
         target_sizes = torch.Tensor([image.shape[:2]]).to(self.device)
-        # convert outputs (bounding boxes and class logits) to COCO API
-        results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
-        # postprocess model predictions
-        predictions = []
-        confidence_threshold = settings.get("confidence_threshold", 0.1)
-        boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
-        for box, score, label in zip(boxes, scores, labels):
-            if score >= confidence_threshold:
+        if settings["mode"] == "text_prompt":
+            text_queries = settings.get("text_queries")
+            inputs = self.processor(text=text_queries, images=image, return_tensors="pt").to(
+                self.device
+            )
+            if sly.is_production():
+                # add object classes to model meta if necessary
+                for text_query in text_queries:
+                    class_name = text_query.replace(" ", "_")
+                    if not self._model_meta.get_obj_class(class_name):
+                        self.class_names.append(class_name)
+                        new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                        self._model_meta = self._model_meta.add_obj_class(new_class)
+            # get model outputs
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+            # convert outputs (bounding boxes and class logits) to COCO API
+            results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
+             # postprocess model predictions
+            predictions = []
+            confidence_threshold = settings.get("confidence_threshold", 0.1)
+            boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
+            for box, score, label in zip(boxes, scores, labels):
+                if score >= confidence_threshold:
+                    box = box.cpu().detach().numpy()
+                    # convert box coordinates from COCO to Supervisely format
+                    box = [box[1], box[0], box[3], box[2]]
+                    label = text_queries[label.item()]
+                    label = label.replace(" ", "_")
+                    if sly.is_production():
+                        class_name = label
+                    else:
+                        class_name = self.class_names[0]
+                    predictions.append(
+                        sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
+                    )
+        elif settings["mode"] == "reference_image":
+            reference_image = api.image.download_np(id=settings["reference_image_id"])
+            inputs = self.processor(
+                images=image,
+                query_images=reference_image,
+                return_tensors="pt",
+            ).to(self.device)
+            with torch.no_grad():
+                outputs = self.model.image_guided_detection(**inputs)
+            results = self.processor.post_process_image_guided_detection(
+                outputs=outputs,
+                threshold=settings["confidence_threshold"],
+                nms_threshold=settings["nms_threshold"],
+                target_sizes=target_sizes,
+            )
+            # postprocess model predictions
+            predictions = []
+            confidence_threshold = settings.get("confidence_threshold", 0.1)
+            boxes, scores = results[0]["boxes"], results[0]["scores"]
+            for box, score in zip(boxes, scores):
                 box = box.cpu().detach().numpy()
                 # convert box coordinates from COCO to Supervisely format
                 box = [box[1], box[0], box[3], box[2]]
-                label = text_queries[label.item()]
-                label = label.replace(" ", "_")
-                if sly.is_production():
-                    class_name = label
-                else:
-                    class_name = self.class_names[0]
+                class_name = settings["reference_class_name"]
                 predictions.append(
                     sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
                 )
@@ -125,6 +154,7 @@ else:
     m.load_on_device(m.model_dir, device)
     image_path = "./demo_data/image_01.jpg"
     settings = {}
+    settings["mode"] = "text_prompt"
     settings["text_queries"] = ["hummingbird"]
     settings["confidence_threshold"] = 0.1
     results = m.predict(image_path, settings=settings)
