@@ -93,7 +93,7 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                 outputs = self.model(**inputs)
             # convert outputs (bounding boxes and class logits) to COCO API
             results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
-             # postprocess model predictions
+            # postprocess model predictions
             predictions = []
             confidence_threshold = settings.get("confidence_threshold", 0.1)
             boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
@@ -109,7 +109,9 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                     else:
                         class_name = self.class_names[0]
                     predictions.append(
-                        sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
+                        sly.nn.PredictionBBox(
+                            class_name=class_name, bbox_tlbr=box, score=score.item()
+                        )
                     )
         elif settings["mode"] == "reference_image":
             reference_image = api.image.download_np(id=settings["reference_image_id"])
@@ -118,6 +120,11 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                 query_images=reference_image,
                 return_tensors="pt",
             ).to(self.device)
+            class_name = settings["reference_class_name"]
+            if not self._model_meta.get_obj_class(class_name):
+                self.class_names.append(class_name)
+                new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                self._model_meta = self._model_meta.add_obj_class(new_class)
             with torch.no_grad():
                 outputs = self.model.image_guided_detection(**inputs)
             results = self.processor.post_process_image_guided_detection(
@@ -134,7 +141,6 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                 box = box.cpu().detach().numpy()
                 # convert box coordinates from COCO to Supervisely format
                 box = [box[1], box[0], box[3], box[2]]
-                class_name = settings["reference_class_name"]
                 predictions.append(
                     sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
                 )
