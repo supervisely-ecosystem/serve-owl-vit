@@ -1,13 +1,15 @@
-# inference mode (can be text_prompt or reference_image)
+# inference mode: text_prompt or reference_image
 mode: text_prompt
-# text prompt (will be used only in text_prompt mode)
+# text prompt (only for text_prompt mode)
 text_queries:
 - enter_text
-# reference image id (will be used only in reference_image mode)
+# reference image id (only for reference_image mode)
 reference_image_id: None
-# object class name for labels (will be used only in reference_image mode)
+# object class name for labels (only for reference_image mode)
 reference_class_name: None
-# non-max suppression threshold (will be used only in reference_image mode)
+# coordinates of bounding box on reference image (only for reference_image mode)
+reference_bbox: None
+# non-max suppression threshold (only for reference_image mode)
 nms_threshold: 0.3
 # prediction confidence threshold
 confidence_threshold: 0.1

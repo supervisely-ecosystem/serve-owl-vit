@@ -114,13 +114,18 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
                         )
                     )
         elif settings["mode"] == "reference_image":
+            # get reference image crop
             reference_image = api.image.download_np(id=settings["reference_image_id"])
+            bbox_coordinates = settings["reference_bbox"]
+            reference_bbox = sly.Rectangle(*bbox_coordinates)
+            reference_image = sly.image.crop(reference_image, reference_bbox)
             inputs = self.processor(
                 images=image,
                 query_images=reference_image,
                 return_tensors="pt",
             ).to(self.device)
             class_name = settings["reference_class_name"]
+            # add object class to model meta if necessary
             if not self._model_meta.get_obj_class(class_name):
                 self.class_names.append(class_name)
                 new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
