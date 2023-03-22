@@ -11,7 +11,7 @@ reference_class_name: None
 reference_bbox: None
 # non-max suppression threshold (only for reference_image mode)
 nms_threshold: 0.3
-# whether ignore big bounding boxes or not
+# whether ignore big bounding boxes or not (only for reference_image mode)
 # if set to True, bounding boxes whose width and height
 # are greater than 95% of images's width and height will be ignored
 ignore_big_bboxes: True
