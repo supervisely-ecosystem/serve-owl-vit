@@ -23,7 +23,7 @@ model_data_path = os.path.join(root_source_path, "models", "model_data.json")
 api = sly.Api()
 
 
-class OWLViTModel(sly.nn.inference.ObjectDetection):
+class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
     def get_models(self):
         model_data = sly.json.load_json_file(model_data_path)
         return model_data
@@ -63,7 +63,6 @@ class OWLViTModel(sly.nn.inference.ObjectDetection):
 
     def get_info(self):
         info = super().get_info()
-        info["task type"] = "prompt-based object detection"
         info["videos_support"] = False
         info["async_video_inference_support"] = False
         return info
