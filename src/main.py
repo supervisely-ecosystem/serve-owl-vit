@@ -103,10 +103,12 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
                 self._model_meta = self._model_meta.add_obj_class(new_class)
             # normalize bounding box coordinates to format required by tensorflow
-            bbox_coordinates[0] = bbox_coordinates[0] / ref_img_height
-            bbox_coordinates[1] = bbox_coordinates[1] / ref_img_width
-            bbox_coordinates[2] = bbox_coordinates[2] / ref_img_height
-            bbox_coordinates[3] = bbox_coordinates[3] / ref_img_width
+            # image will be padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+            scaler = max(ref_img_height, ref_img_width)
+            bbox_coordinates[0] = bbox_coordinates[0] / scaler
+            bbox_coordinates[1] = bbox_coordinates[1] / scaler
+            bbox_coordinates[2] = bbox_coordinates[2] / scaler
+            bbox_coordinates[3] = bbox_coordinates[3] / scaler
             bbox_coordinates = np.array(bbox_coordinates)
             # pass reference image to model
             reference_embeddings, bbox_idx = self.model.embed_image_query(
@@ -139,15 +141,18 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             predictions = []
             for box, score in zip(input_image_boxes, scores):
                 if score >= confidence_threshold:
-                    box[0] = round(box[0] * img_height)
-                    box[1] = round(box[1] * img_width)
-                    box[2] = round(box[2] * img_height)
-                    box[3] = round(box[3] * img_width)
+                    # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+                    scaler = max(img_height, img_width) 
+                    box[0] = round(box[0] * scaler)
+                    box[1] = round(box[1] * scaler)
+                    box[2] = round(box[2] * scaler)
+                    box[3] = round(box[3] * scaler)
                     score = round(float(score), 2)
                     predictions.append(
                         sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
                     )
         elif settings["mode"] == "text_prompt":
+            # get text queries
             text_queries = settings.get("text_queries")
             text_queries = tuple(text_queries)
             n_queries = len(text_queries)
@@ -159,24 +164,32 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                         self.class_names.append(class_name)
                         new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
                         self._model_meta = self._model_meta.add_obj_class(new_class)
+            # extract embeddings from text queries
             query_embeddings = self.model.embed_text_queries(text_queries)
+            # get box confidence scores
             top_query_ind, scores = self.model.get_scores(input_image, query_embeddings, n_queries)
+            # extract input image features and get predicted boxes
             input_image_features, _, input_image_boxes = self.model.embed_image(input_image)
             input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
+            # get predicted logits
             output = self.model._predict_classes_jitted(
                 image_features=input_image_features[None, ...],
                 query_embeddings=query_embeddings[None, ...],
                 )
+            # transform logits to labels
             labels = np.argmax(output['pred_logits'], axis=-1)
             labels = np.squeeze(labels) # remove unnecessary dimension
+            # postprocess model predictions
             confidence_threshold = settings["confidence_threshold"]
             predictions = []
             for box, label, score in zip(input_image_boxes, labels, scores):
                if score >= confidence_threshold:
-                    box[0] = round(box[0] * img_height)
-                    box[1] = round(box[1] * img_width)
-                    box[2] = round(box[2] * img_height)
-                    box[3] = round(box[3] * img_width)
+                    # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+                    scaler = max(img_height, img_width) 
+                    box[0] = round(box[0] * scaler)
+                    box[1] = round(box[1] * scaler)
+                    box[2] = round(box[2] * scaler)
+                    box[3] = round(box[3] * scaler)
                     label = text_queries[label]
                     label = label.replace(" ", "_")
                     if sly.is_production():
