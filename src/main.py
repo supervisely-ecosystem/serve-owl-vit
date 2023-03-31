@@ -1,4 +1,6 @@
 import supervisely as sly
+from supervisely.app.widgets import NotificationBox, Progress
+from supervisely.imaging.color import random_rgb, generate_rgb
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -33,6 +35,22 @@ api = sly.Api()
 
 
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
+    def add_content_to_pretrained_tab(self, gui):
+        self.notification = NotificationBox(
+            description="Please, wait, model is warming up, it can take 5-7 minutes"
+        )
+        self.notification.hide()
+
+        @gui._serve_button.click
+        def serve_model_with_notification():
+            self.notification.show()
+            Progress("Deploying model ...", 1)
+            device = self.gui.get_device()
+            self.load_on_device(self._model_dir, device)
+            self.gui.set_deployed()
+
+        return self.notification
+
     def get_models(self):
         model_data = sly.json.load_json_file(model_data_path)
         return model_data
@@ -76,6 +94,10 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         self.model.warm_up()
         # define class names
         self.class_names = ["object"]
+        # list for storing box colors
+        self.box_colors = []
+        # hide notification
+        self.notification.hide()
         print(f"✅ Model has been successfully loaded on {device.upper()} device")
 
     def get_info(self):
@@ -99,8 +121,13 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             class_name = settings["reference_class_name"]
             # add object class to model meta if necessary
             if not self._model_meta.get_obj_class(class_name):
+                if len(self.box_colors) > 0:
+                    color = generate_rgb(self.box_colors)
+                else:
+                    color = random_rgb()
+                self.box_colors.append(color)
                 self.class_names.append(class_name)
-                new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                new_class = sly.ObjClass(class_name, sly.Rectangle, color)
                 self._model_meta = self._model_meta.add_obj_class(new_class)
             # normalize bounding box coordinates to format required by tensorflow
             # image will be padded to squared form, so it is necessary to adapt bbox coordinates to padded image
@@ -161,8 +188,13 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 for text_query in text_queries:
                     class_name = text_query.replace(" ", "_")
                     if not self._model_meta.get_obj_class(class_name):
+                        if len(self.box_colors) > 0:
+                            color = generate_rgb(self.box_colors)
+                        else:
+                            color = random_rgb()
+                        self.box_colors.append(color)
                         self.class_names.append(class_name)
-                        new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                        new_class = sly.ObjClass(class_name, sly.Rectangle, color)
                         self._model_meta = self._model_meta.add_obj_class(new_class)
             # extract embeddings from text queries
             query_embeddings = self.model.embed_text_queries(text_queries)
