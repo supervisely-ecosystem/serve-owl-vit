@@ -147,6 +147,46 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                     predictions.append(
                         sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
                     )
+        elif settings["mode"] == "text_prompt":
+            text_queries = settings.get("text_queries")
+            text_queries = tuple(text_queries)
+            n_queries = len(text_queries)
+            if sly.is_production():
+                # add object classes to model meta if necessary
+                for text_query in text_queries:
+                    class_name = text_query.replace(" ", "_")
+                    if not self._model_meta.get_obj_class(class_name):
+                        self.class_names.append(class_name)
+                        new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                        self._model_meta = self._model_meta.add_obj_class(new_class)
+            query_embeddings = self.model.embed_text_queries(text_queries)
+            top_query_ind, scores = self.model.get_scores(input_image, query_embeddings, n_queries)
+            input_image_features, _, input_image_boxes = self.model.embed_image(input_image)
+            input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
+            output = self.model._predict_classes_jitted(
+                image_features=input_image_features[None, ...],
+                query_embeddings=query_embeddings[None, ...],
+                )
+            labels = np.argmax(output['pred_logits'], axis=-1)
+            labels = np.squeeze(labels) # remove unnecessary dimension
+            confidence_threshold = settings["confidence_threshold"]
+            predictions = []
+            for box, label, score in zip(input_image_boxes, labels, scores):
+               if score >= confidence_threshold:
+                    box[0] = round(box[0] * img_height)
+                    box[1] = round(box[1] * img_width)
+                    box[2] = round(box[2] * img_height)
+                    box[3] = round(box[3] * img_width)
+                    label = text_queries[label]
+                    label = label.replace(" ", "_")
+                    if sly.is_production():
+                        class_name = label
+                    else:
+                        class_name = self.class_names[0]
+                    score = round(float(score), 2)
+                    predictions.append(
+                        sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
+                    ) 
         return predictions
 
 
