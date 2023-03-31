@@ -28,7 +28,7 @@ XXX
 1. Start the application from Ecosystem
 2. Open the app in your browser
 
-<img src="https://user-images.githubusercontent.com/119248312/229197981-6c71844f-6726-4959-87a7-1e0fad578d52.png" width="80%"/>
+<img src="https://user-images.githubusercontent.com/119248312/229199824-f42f0ff0-1561-4c4d-9216-733ac0a70b06.png" width="80%"/>
 
 3. Select the model you want to deploy.
 4. Click **"SERVE"** button.
