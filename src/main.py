@@ -161,7 +161,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                     input_image_boxes[None, [i], :],
                     input_image_boxes[None, :, :],
                     np_backbone=np)[0][0, 0]
-                ious[i] = -1.0  # mask self-IoU.
+                ious[i] = -1.0  # mask self-iou
                 scores[ious > nms_threshold] = 0.0
             # postprocess model predictions
             confidence_threshold = settings["confidence_threshold"]
