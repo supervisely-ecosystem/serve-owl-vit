@@ -6,8 +6,8 @@ confidence_threshold: 0.1
 nms_threshold: 0.3
 # text prompt, can consist of 1 or more queries (only for text_prompt mode)
 text_queries:
-- first_query
-- second_query
+- first query
+- second query
 # reference image id (only for reference_image mode)
 reference_image_id: None
 # object class name for labels (only for reference_image mode)

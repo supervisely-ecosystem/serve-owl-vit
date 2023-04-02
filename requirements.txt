@@ -1,3 +1,1 @@
-supervisely==6.70.7
-transformers
-torch
+supervisely==6.70.22
