@@ -12,6 +12,6 @@ WORKDIR /
 RUN pip3 install git+https://github.com/openai/CLIP.git
 RUN pip3 install ott-jax==0.2.0
 
-RUN pip3 install "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN pip3 install "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 RUN python3 -m pip install supervisely==6.70.22

@@ -5,8 +5,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-import sys
-sys.path.append('/big_vision/')
 try:
     from typing import Literal
 except ImportError:
