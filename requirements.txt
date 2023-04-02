@@ -1,1 +1,2 @@
 supervisely==6.70.22
+torch
