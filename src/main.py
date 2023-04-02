@@ -1,6 +1,6 @@
 from pip._internal import main as pipmain
 try:
-    pipmain(['uninstall', 'nvidia_cublas_cu11'])
+    pipmain(['uninstall', '-y', 'nvidia_cublas_cu11'])
 except Exception:
     pass
 
