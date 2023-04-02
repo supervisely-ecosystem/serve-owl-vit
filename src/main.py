@@ -1,3 +1,9 @@
+from pip._internal import main as pipmain
+try:
+    pipmain(['uninstall', 'nvidia_cublas_cu11'])
+except Exception:
+    pass
+
 import supervisely as sly
 from supervisely.app.widgets import NotificationBox, Progress
 from supervisely.imaging.color import random_rgb, generate_rgb
