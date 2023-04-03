@@ -19,6 +19,7 @@ app_root_directory = str(Path(__file__).parent.absolute().parents[0])
 import sys
 sys.path.append(os.path.join(app_root_directory, "scenic"))
 
+import torch
 import tensorflow as tf
 from scenic.projects.owl_vit.configs import clip_b16, clip_b32, clip_l14
 from scenic.projects.owl_vit import models
