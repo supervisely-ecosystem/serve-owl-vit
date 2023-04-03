@@ -38,7 +38,7 @@ api = sly.Api()
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
     def add_content_to_pretrained_tab(self, gui):
         self.notification = NotificationBox(
-            description="Please, wait, model is warming up, it can take 5-7 minutes"
+            description="Please, wait, model is warming up, it can take 1-2 minutes"
         )
         self.notification.hide()
 
