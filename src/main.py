@@ -204,6 +204,18 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             # extract input image features and get predicted boxes
             input_image_features, _, input_image_boxes = self.model.embed_image(input_image)
             input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
+            # apply nms to predicted boxes (scores of suppressed boxes will be set to 0)
+            nms_threshold = settings["nms_threshold"]
+            for i in np.argsort(-scores):
+                if not scores[i]:
+                    # this box is already suppressed, continue:
+                    continue
+                ious = box_utils.box_iou(
+                    input_image_boxes[None, [i], :],
+                    input_image_boxes[None, :, :],
+                    np_backbone=np)[0][0, 0]
+                ious[i] = -1.0  # mask self-iou
+                scores[ious > nms_threshold] = 0.0
             # get predicted logits
             output = self.model._predict_classes_jitted(
                 image_features=input_image_features[None, ...],
