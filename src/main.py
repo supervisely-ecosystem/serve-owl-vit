@@ -38,7 +38,7 @@ api = sly.Api()
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
     def add_content_to_pretrained_tab(self, gui):
         self.notification = NotificationBox(
-            description="Please, wait, model is warming up, it can take 1-2 minutes"
+            description="Please, wait, model is warming up, it can take up to 5-7 minutes"
         )
         self.notification.hide()
 
@@ -77,14 +77,27 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         else:
             # hide GPUs from visible devices
             tf.config.set_visible_devices([], "GPU")
-        # load selected model
-        selected_model = self.gui.get_checkpoint_info()["Model"]
-        if selected_model == "OWL-ViT base patch 32":
-            config = clip_b32.get_config(init_mode="canonical_checkpoint")
-        elif selected_model == "OWL-ViT base patch 16":
-            config = clip_b16.get_config(init_mode="canonical_checkpoint")
-        elif selected_model == "OWL-ViT large patch 14":
-            config = clip_l14.get_config(init_mode="canonical_checkpoint")
+        # load model
+        model_source = self.gui.get_model_source()
+        if model_source == "Pretrained models":
+            selected_model = self.gui.get_checkpoint_info()["Model"]
+            if selected_model == "OWL-ViT base patch 32":
+                config = clip_b32.get_config(init_mode="canonical_checkpoint")
+            elif selected_model == "OWL-ViT base patch 16":
+                config = clip_b16.get_config(init_mode="canonical_checkpoint")
+            elif selected_model == "OWL-ViT large patch 14":
+                config = clip_l14.get_config(init_mode="canonical_checkpoint")
+        elif model_source == "Custom models":
+            custom_link = self.gui.get_custom_link()
+            config_file_name = "custom_config.py"
+            config_folder = os.path.join(root_source_path, "src")
+            config_dst_path = os.path.join(config_folder, config_file_name)
+            self.download(
+                src_path=custom_link,
+                dst_path=config_dst_path,
+            )
+            from src import custom_config
+            config = custom_config.get_config(init_mode="canonical_checkpoint")
         module = models.TextZeroShotDetectionModule(
             body_configs=config.model.body,
             normalize=config.model.normalize,
@@ -152,8 +165,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             )
             _, _, input_image_boxes = self.model.embed_image(input_image)
             input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
-            nms_threshold = settings["nms_threshold"]
             # apply nms to predicted boxes (scores of suppressed boxes will be set to 0)
+            nms_threshold = settings["nms_threshold"]
             for i in np.argsort(-scores):
                 if not scores[i]:
                     # this box is already suppressed, continue:
@@ -256,7 +269,7 @@ m = OWLViTModel(
 if sly.is_production():
     m.serve()
 else:
-    device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device:", device)
     m.load_on_device(m.model_dir, device)
     image_path = "./demo_data/image_01.jpg"
