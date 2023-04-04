@@ -1,4 +1,6 @@
 import supervisely as sly
+from supervisely.app.widgets import NotificationBox, Progress
+from supervisely.imaging.color import random_rgb, generate_rgb
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -12,8 +14,18 @@ from typing import List, Any, Dict
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from transformers import OwlViTProcessor, OwlViTForObjectDetection
+
+app_root_directory = str(Path(__file__).parent.absolute().parents[0])
+import sys
+sys.path.append(os.path.join(app_root_directory, "scenic"))
+
 import torch
+import tensorflow as tf
+from scenic.projects.owl_vit.configs import clip_b16, clip_b32, clip_l14
+from scenic.projects.owl_vit import models
+from scenic.projects.owl_vit.notebooks import inference
+from scenic.model_lib.base_models import box_utils
+import numpy as np
 
 
 load_dotenv("local.env")
@@ -24,6 +36,22 @@ api = sly.Api()
 
 
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
+    def add_content_to_pretrained_tab(self, gui):
+        self.notification = NotificationBox(
+            description="Please, wait, model is warming up, it can take 1-2 minutes"
+        )
+        self.notification.hide()
+
+        @gui._serve_button.click
+        def serve_model_with_notification():
+            self.notification.show()
+            Progress("Deploying model ...", 1)
+            device = self.gui.get_device()
+            self.load_on_device(self._model_dir, device)
+            self.gui.set_deployed()
+
+        return self.notification
+
     def get_models(self):
         model_data = sly.json.load_json_file(model_data_path)
         return model_data
@@ -42,23 +70,35 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         model_dir,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
     ):
+        if device.startswith("cuda"):
+            # set GPU as visible device
+            gpus = tf.config.list_physical_devices("GPU")
+            tf.config.set_visible_devices(gpus[0], "GPU")
+        else:
+            # hide GPUs from visible devices
+            tf.config.set_visible_devices([], "GPU")
         # load selected model
         selected_model = self.gui.get_checkpoint_info()["Model"]
         if selected_model == "OWL-ViT base patch 32":
-            self.processor = OwlViTProcessor.from_pretrained("google/owlvit-base-patch32")
-            self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")
+            config = clip_b32.get_config(init_mode="canonical_checkpoint")
         elif selected_model == "OWL-ViT base patch 16":
-            self.processor = OwlViTProcessor.from_pretrained("google/owlvit-base-patch16")
-            self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch16")
+            config = clip_b16.get_config(init_mode="canonical_checkpoint")
         elif selected_model == "OWL-ViT large patch 14":
-            self.processor = OwlViTProcessor.from_pretrained("google/owlvit-large-patch14")
-            self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-large-patch14")
-        self.device = device
-        # set model in evaluation mode
-        self.model = self.model.to(self.device)
-        self.model.eval()
+            config = clip_l14.get_config(init_mode="canonical_checkpoint")
+        module = models.TextZeroShotDetectionModule(
+            body_configs=config.model.body,
+            normalize=config.model.normalize,
+            box_bias=config.model.box_bias,
+        )
+        variables = module.load_variables(config.init_from.checkpoint_path)
+        self.model = inference.Model(config, module, variables)
+        self.model.warm_up()
         # define class names
         self.class_names = ["object"]
+        # list for storing box colors
+        self.box_colors = []
+        # hide notification
+        self.notification.hide()
         print(f"✅ Model has been successfully loaded on {device.upper()} device")
 
     def get_info(self):
@@ -72,88 +112,139 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
 
     def predict(self, image_path: str, settings: Dict[str, Any]) -> List[sly.nn.PredictionBBox]:
         # prepare input data
-        image = sly.image.read(image_path)
-        img_height, img_width = image.shape[:2]
-        target_sizes = torch.Tensor([image.shape[:2]]).to(self.device)
-        if settings["mode"] == "text_prompt":
-            text_queries = settings.get("text_queries")
-            inputs = self.processor(text=text_queries, images=image, return_tensors="pt").to(
-                self.device
+        input_image = sly.image.read(image_path)
+        img_height, img_width = input_image.shape[:2]
+        if settings["mode"] == "reference_image":
+            # get reference image and coordinates of its bbox
+            reference_image = api.image.download_np(id=settings["reference_image_id"])
+            ref_img_height, ref_img_width = reference_image.shape[:2]
+            bbox_coordinates = settings["reference_bbox"]
+            class_name = settings["reference_class_name"]
+            # add object class to model meta if necessary
+            if not self._model_meta.get_obj_class(class_name):
+                if len(self.box_colors) > 0:
+                    color = generate_rgb(self.box_colors)
+                else:
+                    color = random_rgb()
+                self.box_colors.append(color)
+                self.class_names.append(class_name)
+                new_class = sly.ObjClass(class_name, sly.Rectangle, color)
+                self._model_meta = self._model_meta.add_obj_class(new_class)
+            # normalize bounding box coordinates to format required by tensorflow
+            # image will be padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+            scaler = max(ref_img_height, ref_img_width)
+            bbox_coordinates[0] = bbox_coordinates[0] / scaler
+            bbox_coordinates[1] = bbox_coordinates[1] / scaler
+            bbox_coordinates[2] = bbox_coordinates[2] / scaler
+            bbox_coordinates[3] = bbox_coordinates[3] / scaler
+            bbox_coordinates = np.array(bbox_coordinates)
+            # pass reference image to model
+            reference_embeddings, bbox_idx = self.model.embed_image_query(
+                query_image=reference_image,
+                query_box_yxyx=bbox_coordinates,
             )
+            n_queries = 1  # model does not support multi-query image-conditioned detection
+            # get model predictions
+            top_query_idx, scores = self.model.get_scores(
+                input_image,
+                reference_embeddings[None, ...],
+                num_queries=1,
+            )
+            _, _, input_image_boxes = self.model.embed_image(input_image)
+            input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
+            nms_threshold = settings["nms_threshold"]
+            # apply nms to predicted boxes (scores of suppressed boxes will be set to 0)
+            for i in np.argsort(-scores):
+                if not scores[i]:
+                    # this box is already suppressed, continue:
+                    continue
+                ious = box_utils.box_iou(
+                    input_image_boxes[None, [i], :],
+                    input_image_boxes[None, :, :],
+                    np_backbone=np)[0][0, 0]
+                ious[i] = -1.0  # mask self-iou
+                scores[ious > nms_threshold] = 0.0
+            # postprocess model predictions
+            confidence_threshold = settings["confidence_threshold"]
+            predictions = []
+            for box, score in zip(input_image_boxes, scores):
+                if score >= confidence_threshold:
+                    # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+                    scaler = max(img_height, img_width) 
+                    box[0] = round(box[0] * scaler)
+                    box[1] = round(box[1] * scaler)
+                    box[2] = round(box[2] * scaler)
+                    box[3] = round(box[3] * scaler)
+                    score = round(float(score), 2)
+                    predictions.append(
+                        sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
+                    )
+        elif settings["mode"] == "text_prompt":
+            # get text queries
+            text_queries = settings.get("text_queries")
+            text_queries = tuple(text_queries)
+            n_queries = len(text_queries)
             if sly.is_production():
                 # add object classes to model meta if necessary
                 for text_query in text_queries:
                     class_name = text_query.replace(" ", "_")
                     if not self._model_meta.get_obj_class(class_name):
+                        if len(self.box_colors) > 0:
+                            color = generate_rgb(self.box_colors)
+                        else:
+                            color = random_rgb()
+                        self.box_colors.append(color)
                         self.class_names.append(class_name)
-                        new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
+                        new_class = sly.ObjClass(class_name, sly.Rectangle, color)
                         self._model_meta = self._model_meta.add_obj_class(new_class)
-            # get model outputs
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-            # convert outputs (bounding boxes and class logits) to COCO API
-            results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
+            # extract embeddings from text queries
+            query_embeddings = self.model.embed_text_queries(text_queries)
+            # get box confidence scores
+            top_query_ind, scores = self.model.get_scores(input_image, query_embeddings, n_queries)
+            # extract input image features and get predicted boxes
+            input_image_features, _, input_image_boxes = self.model.embed_image(input_image)
+            input_image_boxes = box_utils.box_cxcywh_to_yxyx(input_image_boxes, np)
+            # apply nms to predicted boxes (scores of suppressed boxes will be set to 0)
+            nms_threshold = settings["nms_threshold"]
+            for i in np.argsort(-scores):
+                if not scores[i]:
+                    # this box is already suppressed, continue:
+                    continue
+                ious = box_utils.box_iou(
+                    input_image_boxes[None, [i], :],
+                    input_image_boxes[None, :, :],
+                    np_backbone=np)[0][0, 0]
+                ious[i] = -1.0  # mask self-iou
+                scores[ious > nms_threshold] = 0.0
+            # get predicted logits
+            output = self.model._predict_classes_jitted(
+                image_features=input_image_features[None, ...],
+                query_embeddings=query_embeddings[None, ...],
+                )
+            # transform logits to labels
+            labels = np.argmax(output['pred_logits'], axis=-1)
+            labels = np.squeeze(labels) # remove unnecessary dimension
             # postprocess model predictions
+            confidence_threshold = settings["confidence_threshold"]
             predictions = []
-            confidence_threshold = settings.get("confidence_threshold", 0.1)
-            boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
-            for box, score, label in zip(boxes, scores, labels):
-                if score >= confidence_threshold:
-                    box = box.cpu().detach().numpy()
-                    # convert box coordinates from COCO to Supervisely format
-                    box = [box[1], box[0], box[3], box[2]]
-                    label = text_queries[label.item()]
+            for box, label, score in zip(input_image_boxes, labels, scores):
+               if score >= confidence_threshold:
+                    # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
+                    scaler = max(img_height, img_width) 
+                    box[0] = round(box[0] * scaler)
+                    box[1] = round(box[1] * scaler)
+                    box[2] = round(box[2] * scaler)
+                    box[3] = round(box[3] * scaler)
+                    label = text_queries[label]
                     label = label.replace(" ", "_")
                     if sly.is_production():
                         class_name = label
                     else:
                         class_name = self.class_names[0]
+                    score = round(float(score), 2)
                     predictions.append(
-                        sly.nn.PredictionBBox(
-                            class_name=class_name, bbox_tlbr=box, score=score.item()
-                        )
-                    )
-        elif settings["mode"] == "reference_image":
-            # get reference image crop
-            reference_image = api.image.download_np(id=settings["reference_image_id"])
-            bbox_coordinates = settings["reference_bbox"]
-            reference_bbox = sly.Rectangle(*bbox_coordinates)
-            reference_image = sly.image.crop(reference_image, reference_bbox)
-            inputs = self.processor(
-                images=image,
-                query_images=reference_image,
-                return_tensors="pt",
-            ).to(self.device)
-            class_name = settings["reference_class_name"]
-            # add object class to model meta if necessary
-            if not self._model_meta.get_obj_class(class_name):
-                self.class_names.append(class_name)
-                new_class = sly.ObjClass(class_name, sly.Rectangle, [255, 0, 0])
-                self._model_meta = self._model_meta.add_obj_class(new_class)
-            with torch.no_grad():
-                outputs = self.model.image_guided_detection(**inputs)
-            results = self.processor.post_process_image_guided_detection(
-                outputs=outputs,
-                threshold=settings["confidence_threshold"],
-                nms_threshold=settings["nms_threshold"],
-                target_sizes=target_sizes,
-            )
-            # postprocess model predictions
-            predictions = []
-            confidence_threshold = settings.get("confidence_threshold", 0.1)
-            boxes, scores = results[0]["boxes"], results[0]["scores"]
-            for box, score in zip(boxes, scores):
-                box = box.cpu().detach().numpy()
-                # convert box coordinates from COCO to Supervisely format
-                box = [box[1], box[0], box[3], box[2]]
-                # ingore box if its width or height is greater than 95% of image width / height
-                if settings["ignore_big_bboxes"]:
-                    box_height, box_width = box[2] - box[0] + 1, box[3] - box[1] + 1
-                    if box_height > int(0.95 * img_height) or box_width > int(0.95 * img_width):
-                        continue
-                predictions.append(
-                    sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
-                )
+                        sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
+                    ) 
         return predictions
 
 
@@ -165,7 +256,7 @@ m = OWLViTModel(
 if sly.is_production():
     m.serve()
 else:
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     print("Using device:", device)
     m.load_on_device(m.model_dir, device)
     image_path = "./demo_data/image_01.jpg"
