@@ -41,6 +41,13 @@ Copy model file path from Team Files and select task type:
 
 https://user-images.githubusercontent.com/91027877/229937368-cd101c7c-57ff-43b5-a4a6-bc8e218c7e18.MP4
 
+# Example: apply OWL-ViT to image in labeling tool
+
+Run NN Image Labeling app, connect to OWL-ViT, write text queries and click on "Apply model to image":
+
+https://user-images.githubusercontent.com/91027877/229938469-be3c3c2a-809f-47a8-ad59-7b91cead3ec4.MP4
+
+
 
 ## Related Apps
 
