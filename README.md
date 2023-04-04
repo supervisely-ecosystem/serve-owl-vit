@@ -6,6 +6,7 @@
 <p align="center">
   <a href="#Overview">Overview</a> •
   <a href="#How-To-Run">How To Run</a> •
+  <a href="#example-apply-owl-vit-to-image-in-labeling-tool">Example: apply OWL-ViT to image in labeling tool</a> •
   <a href="#Related-apps">Related Apps</a> •
   <a href="#Acknowledgment">Acknowledgment</a>
 </p>
