@@ -25,14 +25,21 @@ XXX
 
 ## How To Run
 
-1. Start the application from Ecosystem
-2. Open the app in your browser
+**Pretrained models**
 
-<img src="https://user-images.githubusercontent.com/119248312/229199824-f42f0ff0-1561-4c4d-9216-733ac0a70b06.png" width="80%"/>
+**Step 1.** Select pretrained model architecture and press the **Serve** button:
 
-3. Select the model you want to deploy.
-4. Click **"SERVE"** button.
-5. ✅ That's it! Now you can use other apps with your model.
+<img src="https://user-images.githubusercontent.com/91027877/229937093-7af34d05-4fd6-450a-858e-eb0cac8731a8.png" width="80%"/>
+
+**Step 2.** Wait for the model to deploy:
+
+<img src="https://user-images.githubusercontent.com/91027877/229936905-33153fca-5251-4f75-98f2-117f0d3890b3.png" width="80%"/>
+
+**Custom models**
+
+Copy model file path from Team Files and select task type:
+
+https://user-images.githubusercontent.com/91027877/229937368-cd101c7c-57ff-43b5-a4a6-bc8e218c7e18.MP4
 
 
 ## Related Apps
