@@ -47,7 +47,13 @@ Run NN Image Labeling app, connect to OWL-ViT, write text queries and click on "
 
 https://user-images.githubusercontent.com/91027877/229938469-be3c3c2a-809f-47a8-ad59-7b91cead3ec4.MP4
 
+If you want to use reference image mode, you can create bounding box for target object and click on apply model to "Apply model to ROI":
 
+https://user-images.githubusercontent.com/115161827/229866610-4e529b09-f2cf-4054-ae1c-acae34ea1fab.mp4
+
+If model predictions look unsatisfying, you can try to tune confidence threshold or nms threshold (if you want to increase number of predicted bounding boxes - decrease confidence threshold and increase nms threshold):
+
+https://user-images.githubusercontent.com/115161827/229866632-9fd8d245-d1a5-454b-a132-3683839000b8.mp4
 
 ## Related Apps
 
