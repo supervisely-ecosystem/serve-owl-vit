@@ -21,7 +21,7 @@
 
 ## Overview
 
-XXX
+OWL-ViT is an object detection neural network trained on a variety of image - text pairs, which demonstrates outstanding performance on zero-shot text-conditioned and one-shot image-conditioned object detection. It can be used in text prompt mode to detect objects described in text queries or in reference image mode to detect object which was framed by a bounding box on a reference image.
 
 ## How To Run
 
