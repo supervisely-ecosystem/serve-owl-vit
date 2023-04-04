@@ -64,5 +64,5 @@ You can use deployed model in the following Supervisely Applications ⬇️
     
 ## Acknowledgment
 
-- Based on: 
-- Paper: 
+- Based on: https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit
+- Paper: https://arxiv.org/abs/2205.06230
