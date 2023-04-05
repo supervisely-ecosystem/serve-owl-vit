@@ -40,13 +40,13 @@ OWL-ViT is an object detection neural network trained on a variety of image - te
 
 Copy model file path from Team Files and select task type:
 
-https://user-images.githubusercontent.com/91027877/229937368-cd101c7c-57ff-43b5-a4a6-bc8e218c7e18.MP4
+https://user-images.githubusercontent.com/91027877/230073739-041348e8-e28e-46f7-8fc3-35799c00aa20.mp4
 
 # Example: apply OWL-ViT to image in labeling tool
 
 Run NN Image Labeling app, connect to OWL-ViT, write text queries and click on "Apply model to image":
 
-https://user-images.githubusercontent.com/91027877/229938469-be3c3c2a-809f-47a8-ad59-7b91cead3ec4.mp4
+https://user-images.githubusercontent.com/91027877/230073611-7934917d-bebe-4825-8a1f-e5343335b0d3.mp4
 
 If you want to use reference image mode, you can create bounding box for target object and click on "Apply model to ROI":
 
