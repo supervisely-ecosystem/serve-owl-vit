@@ -48,7 +48,7 @@ Run NN Image Labeling app, connect to OWL-ViT, write text queries and click on "
 
 https://user-images.githubusercontent.com/91027877/229938469-be3c3c2a-809f-47a8-ad59-7b91cead3ec4.mp4
 
-If you want to use reference image mode, you can create bounding box for target object and click on apply model to "Apply model to ROI":
+If you want to use reference image mode, you can create bounding box for target object and click on "Apply model to ROI":
 
 https://user-images.githubusercontent.com/115161827/229866610-4e529b09-f2cf-4054-ae1c-acae34ea1fab.mp4
 
