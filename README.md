@@ -65,7 +65,7 @@ You can use deployed model in the following Supervisely Applications ⬇️
     
 - [Apply Owl-ViT to Images Project](https://ecosystem.supervise.ly/apps/apply-owl-vit-to-images-project) - app allows to apply OWL-ViT model directly to images project with graphical user interface
     
-    <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/apply-owl-vit-to-images-project" src="xxx" height="70px" margin-bottom="20px"/>
+    <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/apply-owl-vit-to-images-project" src="https://user-images.githubusercontent.com/115161827/230896644-0ddb3a30-26bf-4468-b1fe-1bfc1d84a3f6.png" height="70px" margin-bottom="20px"/>
     
 ## Acknowledgment
 
