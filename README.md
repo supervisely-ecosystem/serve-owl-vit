@@ -71,5 +71,5 @@ You can use deployed model in the following Supervisely Applications ⬇️
 
 This app is based on the model `OWL-ViT`. 
 
-Check it out on [github](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit). ![GitHub Org's stars](https://img.shields.io/github/stars/google-research/scenic?style=social) 
-[Paper](https://arxiv.org/abs/2205.06230)
+- Check it out on [github](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit). ![GitHub Org's stars](https://img.shields.io/github/stars/google-research/scenic?style=social) <br>
+- [Paper](https://arxiv.org/abs/2205.06230)
