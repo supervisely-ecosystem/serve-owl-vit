@@ -17,6 +17,7 @@ from pathlib import Path
 
 app_root_directory = str(Path(__file__).parent.absolute().parents[0])
 import sys
+
 sys.path.append(os.path.join(app_root_directory, "scenic"))
 
 import torch
@@ -97,6 +98,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 dst_path=config_dst_path,
             )
             from src import custom_config
+
             config = custom_config.get_config(init_mode="canonical_checkpoint")
         module = models.TextZeroShotDetectionModule(
             body_configs=config.model.body,
@@ -127,6 +129,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         # prepare input data
         input_image = sly.image.read(image_path)
         img_height, img_width = input_image.shape[:2]
+        if self._model_meta is None:
+            self._model_meta = self.model_meta
         if settings["mode"] == "reference_image":
             # get reference image and coordinates of its bbox
             reference_image = api.image.download_np(id=settings["reference_image_id"])
@@ -172,9 +176,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                     # this box is already suppressed, continue:
                     continue
                 ious = box_utils.box_iou(
-                    input_image_boxes[None, [i], :],
-                    input_image_boxes[None, :, :],
-                    np_backbone=np)[0][0, 0]
+                    input_image_boxes[None, [i], :], input_image_boxes[None, :, :], np_backbone=np
+                )[0][0, 0]
                 ious[i] = -1.0  # mask self-iou
                 scores[ious > nms_threshold] = 0.0
             # postprocess model predictions
@@ -183,7 +186,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             for box, score in zip(input_image_boxes, scores):
                 if score >= confidence_threshold:
                     # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
-                    scaler = max(img_height, img_width) 
+                    scaler = max(img_height, img_width)
                     box[0] = round(box[0] * scaler)
                     box[1] = round(box[1] * scaler)
                     box[2] = round(box[2] * scaler)
@@ -224,26 +227,25 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                     # this box is already suppressed, continue:
                     continue
                 ious = box_utils.box_iou(
-                    input_image_boxes[None, [i], :],
-                    input_image_boxes[None, :, :],
-                    np_backbone=np)[0][0, 0]
+                    input_image_boxes[None, [i], :], input_image_boxes[None, :, :], np_backbone=np
+                )[0][0, 0]
                 ious[i] = -1.0  # mask self-iou
                 scores[ious > nms_threshold] = 0.0
             # get predicted logits
             output = self.model._predict_classes_jitted(
                 image_features=input_image_features[None, ...],
                 query_embeddings=query_embeddings[None, ...],
-                )
+            )
             # transform logits to labels
-            labels = np.argmax(output['pred_logits'], axis=-1)
-            labels = np.squeeze(labels) # remove unnecessary dimension
+            labels = np.argmax(output["pred_logits"], axis=-1)
+            labels = np.squeeze(labels)  # remove unnecessary dimension
             # postprocess model predictions
             confidence_threshold = settings["confidence_threshold"]
             predictions = []
             for box, label, score in zip(input_image_boxes, labels, scores):
-               if score >= confidence_threshold:
+                if score >= confidence_threshold:
                     # image was padded to squared form, so it is necessary to adapt bbox coordinates to padded image
-                    scaler = max(img_height, img_width) 
+                    scaler = max(img_height, img_width)
                     box[0] = round(box[0] * scaler)
                     box[1] = round(box[1] * scaler)
                     box[2] = round(box[2] * scaler)
@@ -257,7 +259,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                     score = round(float(score), 2)
                     predictions.append(
                         sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score)
-                    ) 
+                    )
         return predictions
 
 
