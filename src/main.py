@@ -75,6 +75,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             # set GPU as visible device
             gpus = tf.config.list_physical_devices("GPU")
             tf.config.set_visible_devices(gpus[0], "GPU")
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
         else:
             # hide GPUs from visible devices
             tf.config.set_visible_devices([], "GPU")
