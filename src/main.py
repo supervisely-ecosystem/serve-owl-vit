@@ -34,6 +34,7 @@ load_dotenv(os.path.expanduser("~/supervisely.env"))
 root_source_path = str(Path(__file__).parents[1])
 model_data_path = os.path.join(root_source_path, "models", "model_data.json")
 api = sly.Api()
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
