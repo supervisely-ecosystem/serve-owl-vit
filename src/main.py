@@ -86,10 +86,13 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         if model_source == "Pretrained models":
             selected_model = self.gui.get_checkpoint_info()["Model"]
             if selected_model == "OWL-ViT base patch 32":
+                variables_filename = "variables_base_32.npy"
                 config = clip_b32.get_config(init_mode="canonical_checkpoint")
             elif selected_model == "OWL-ViT base patch 16":
+                variables_filename = "variables_base_16.npy"
                 config = clip_b16.get_config(init_mode="canonical_checkpoint")
             elif selected_model == "OWL-ViT large patch 14":
+                variables_filename = "variables_large_14.npy"
                 config = clip_l14.get_config(init_mode="canonical_checkpoint")
         elif model_source == "Custom models":
             custom_link = self.gui.get_custom_link()
@@ -108,7 +111,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             normalize=config.model.normalize,
             box_bias=config.model.box_bias,
         )
-        variables = module.load_variables(config.init_from.checkpoint_path)
+        variables = np.load(variables_filename, allow_pickle=True)
+        variables = variables.item()
         self.model = inference.Model(config, module, variables)
         self.model.warm_up()
         # define class names
