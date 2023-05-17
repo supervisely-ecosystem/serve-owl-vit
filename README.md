@@ -38,9 +38,9 @@ OWL-ViT is an object detection neural network trained on a variety of image - te
 
 **Custom models**
 
-Copy model file path from Team Files and select task type:
+Copy model file path from Team Files and select model type:
 
-https://user-images.githubusercontent.com/91027877/230073739-041348e8-e28e-46f7-8fc3-35799c00aa20.mp4
+https://user-images.githubusercontent.com/91027877/239012909-2728f5e1-befe-4309-9e2c-3cb22500cfb5.mp4
 
 # Example: apply OWL-ViT to image in labeling tool
 
