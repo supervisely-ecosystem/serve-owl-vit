@@ -1,5 +1,5 @@
 import supervisely as sly
-from supervisely.app.widgets import NotificationBox, Progress
+from supervisely.app.widgets import NotificationBox, Progress, RadioGroup, Field
 from supervisely.imaging.color import random_rgb, generate_rgb
 import warnings
 
@@ -38,6 +38,18 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
+    def add_content_to_custom_tab(self, gui):
+        self.select_model_type = RadioGroup(
+            items=[
+                RadioGroup.Item(value="OWL-ViT base patch 32"),
+                RadioGroup.Item(value="OWL-ViT base patch 16"),
+                RadioGroup.Item(value="OWL-ViT large patch 14"),
+            ],
+            direction="vertical",
+        )
+        select_model_type_f = Field(self.select_model_type, "Select model architecture")
+        return select_model_type_f
+
     def add_content_to_pretrained_tab(self, gui):
         self.notification = NotificationBox(
             description="Please, wait, model is warming up, it can take up to 5-7 minutes"
@@ -96,16 +108,19 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 config = clip_l14.get_config(init_mode="canonical_checkpoint")
         elif model_source == "Custom models":
             custom_link = self.gui.get_custom_link()
-            config_file_name = "custom_config.py"
-            config_folder = os.path.join(root_source_path, "src")
-            config_dst_path = os.path.join(config_folder, config_file_name)
+            variables_filename = "/variables/custom_weights.npy"
             self.download(
                 src_path=custom_link,
-                dst_path=config_dst_path,
+                dst_path=variables_filename,
             )
-            from src import custom_config
+            selected_model = self.select_model_type.get_value()
+            if selected_model == "OWL-ViT base patch 32":
+                config = clip_b32.get_config(init_mode="canonical_checkpoint")
+            elif selected_model == "OWL-ViT base patch 16":
+                config = clip_b16.get_config(init_mode="canonical_checkpoint")
+            elif selected_model == "OWL-ViT large patch 14":
+                config = clip_l14.get_config(init_mode="canonical_checkpoint")
 
-            config = custom_config.get_config(init_mode="canonical_checkpoint")
         module = models.TextZeroShotDetectionModule(
             body_configs=config.model.body,
             normalize=config.model.normalize,
