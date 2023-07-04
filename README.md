@@ -61,7 +61,7 @@ https://user-images.githubusercontent.com/115161827/229866632-9fd8d245-d1a5-454b
 You can use deployed model in the following Supervisely Applications ⬇️ 
     
 - [NN Image Labeling](https://ecosystem.supervise.ly/apps/supervisely-ecosystem%252Fnn-image-labeling%252Fannotation-tool) - integrate any deployed NN to Supervisely Image Labeling UI. Configure inference settings and model output classes. Press `Apply` button (or use hotkey) and detections with their confidences will immediately appear on the image.   
-    <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/nn-image-labeling/annotation-tool" src="https://i.imgur.com/hYEucNt.png" height="70px" margin-bottom="20px"/>
+    <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/nn-image-labeling/annotation-tool" src="media/r1.png" height="70px" margin-bottom="20px"/>
     
 - [Apply Owl-ViT to Images Project](https://ecosystem.supervise.ly/apps/apply-owl-vit-to-images-project) - app allows to apply OWL-ViT model directly to images project with graphical user interface
     
