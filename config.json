@@ -2,7 +2,7 @@
   "name": "Serve OWL-ViT",
   "type": "app",
   "version": "2.0.0",
-  "description": "Deploy model as REST API service",
+  "description": "Class-agnostic interactive detection for auto-prelabeling",
   "categories": [
     "neural network",
     "images",
