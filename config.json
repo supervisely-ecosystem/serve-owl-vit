@@ -13,7 +13,8 @@
   "icon": "https://user-images.githubusercontent.com/119248312/229181279-feeeccf6-4fed-4406-b646-24d526e0ec6e.jpg",
   "icon_cover": true,
   "poster": "https://user-images.githubusercontent.com/119248312/229181284-446c6cb0-32e2-47e7-911c-917932f648fd.jpg",
-  "need_gpu": true,
+  "need_gpu": false,
+  "gpu": "preferred",
   "session_tags": [
     "deployed_owl_vit_object_detection"
   ],
