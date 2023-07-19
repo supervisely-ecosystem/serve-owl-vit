@@ -50,22 +50,6 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         select_model_type_f = Field(self.select_model_type, "Select model architecture")
         return select_model_type_f
 
-    def add_content_to_pretrained_tab(self, gui):
-        self.notification = NotificationBox(
-            description="Please, wait, model is warming up, it can take up to 5-7 minutes"
-        )
-        self.notification.hide()
-
-        @gui._serve_button.click
-        def serve_model_with_notification():
-            self.notification.show()
-            Progress("Deploying model ...", 1)
-            device = self.gui.get_device()
-            self.load_on_device(self._model_dir, device)
-            self.gui.set_deployed()
-
-        return self.notification
-
     def get_models(self):
         model_data = sly.json.load_json_file(model_data_path)
         return model_data
@@ -134,8 +118,6 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         self.class_names = ["object"]
         # list for storing box colors
         self.box_colors = []
-        # hide notification
-        self.notification.hide()
         print(f"✅ Model has been successfully loaded on {device.upper()} device")
 
     def get_info(self):
@@ -203,7 +185,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 ious[i] = -1.0  # mask self-iou
                 scores[ious > nms_threshold] = 0.0
             # postprocess model predictions
-            confidence_threshold = settings["confidence_threshold"]
+            confidence_threshold = settings["confidence_threshold"][1]["reference_image"]
             predictions = []
             for box, score in zip(input_image_boxes, scores):
                 if score >= confidence_threshold:
@@ -262,7 +244,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             labels = np.argmax(output["pred_logits"], axis=-1)
             labels = np.squeeze(labels)  # remove unnecessary dimension
             # postprocess model predictions
-            confidence_threshold = settings["confidence_threshold"]
+            confidence_threshold = settings["confidence_threshold"][0]["text_prompt"]
             predictions = []
             for box, label, score in zip(input_image_boxes, labels, scores):
                 if score >= confidence_threshold:
