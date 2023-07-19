@@ -203,7 +203,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 ious[i] = -1.0  # mask self-iou
                 scores[ious > nms_threshold] = 0.0
             # postprocess model predictions
-            confidence_threshold = settings["confidence_threshold"]
+            confidence_threshold = settings["confidence_threshold"]["reference_image"]
             predictions = []
             for box, score in zip(input_image_boxes, scores):
                 if score >= confidence_threshold:
@@ -262,7 +262,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             labels = np.argmax(output["pred_logits"], axis=-1)
             labels = np.squeeze(labels)  # remove unnecessary dimension
             # postprocess model predictions
-            confidence_threshold = settings["confidence_threshold"]
+            confidence_threshold = settings["confidence_threshold"]["text_prompt"]
             predictions = []
             for box, label, score in zip(input_image_boxes, labels, scores):
                 if score >= confidence_threshold:
