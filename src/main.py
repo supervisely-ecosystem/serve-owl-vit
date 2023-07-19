@@ -262,6 +262,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             labels = np.argmax(output["pred_logits"], axis=-1)
             labels = np.squeeze(labels)  # remove unnecessary dimension
             # postprocess model predictions
+            print("Confidence threshold:")
+            print(settings["confidence_threshold"])
             confidence_threshold = settings["confidence_threshold"]["text_prompt"]
             predictions = []
             for box, label, score in zip(input_image_boxes, labels, scores):
