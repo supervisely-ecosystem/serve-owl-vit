@@ -59,7 +59,6 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         self.model.eval()
         # define class names
         self.class_names = ["object"]
-        print(f"✅ Model has been successfully loaded on {device.upper()} device")
 
     def get_info(self):
         info = super().get_info()
