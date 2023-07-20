@@ -53,7 +53,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         elif selected_model == "OWL-ViT large patch 14":
             self.processor = OwlViTProcessor.from_pretrained("google/owlvit-large-patch14")
             self.model = OwlViTForObjectDetection.from_pretrained("google/owlvit-large-patch14")
-        self.device = device
+        self.device = torch.device(device)
         # set model in evaluation mode
         self.model = self.model.to(self.device)
         self.model.eval()
@@ -95,7 +95,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             results = self.processor.post_process(outputs=outputs, target_sizes=target_sizes)
             # postprocess model predictions
             predictions = []
-            confidence_threshold = settings.get("confidence_threshold", 0.1)
+            confidence_threshold = settings["confidence_threshold"][0]["text_prompt"]
             boxes, scores, labels = results[0]["boxes"], results[0]["scores"], results[0]["labels"]
             for box, score, label in zip(boxes, scores, labels):
                 if score >= confidence_threshold:
@@ -134,7 +134,7 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 outputs = self.model.image_guided_detection(**inputs)
             results = self.processor.post_process_image_guided_detection(
                 outputs=outputs,
-                threshold=settings["confidence_threshold"],
+                threshold=settings["confidence_threshold"][1]["reference_image"],
                 nms_threshold=settings["nms_threshold"],
                 target_sizes=target_sizes,
             )
@@ -172,7 +172,7 @@ else:
     settings = {}
     settings["mode"] = "text_prompt"
     settings["text_queries"] = ["hummingbird"]
-    settings["confidence_threshold"] = 0.1
+    settings["confidence_threshold"] = [{"text_prompt": 0.1}]
     results = m.predict(image_path, settings=settings)
     vis_path = "./demo_data/image_01_prediction.jpg"
     m.visualize(results, image_path, vis_path, thickness=7)
