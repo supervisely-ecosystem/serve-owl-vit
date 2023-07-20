@@ -56,6 +56,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
         self.device = torch.device(device)
         # set model in evaluation mode
         self.model = self.model.to(self.device)
+        print("Is on GPU:")
+        print(next(self.model.parameters()).device)
         self.model.eval()
         # define class names
         self.class_names = ["object"]

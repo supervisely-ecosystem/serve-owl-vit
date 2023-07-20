@@ -2,23 +2,29 @@
   "name": "Serve OWL-ViT",
   "type": "app",
   "version": "2.0.0",
-  "description": "Deploy model as REST API service",
+  "description": "Class-agnostic interactive detection for auto-prelabeling",
   "categories": [
     "neural network",
     "images",
     "object detection",
-    "serve",
-    "development"
+    "interactive detection",
+    "serve"
   ],
+  "icon": "https://user-images.githubusercontent.com/119248312/229181279-feeeccf6-4fed-4406-b646-24d526e0ec6e.jpg",
   "icon_cover": true,
-  "need_gpu": true,
+  "poster": "https://user-images.githubusercontent.com/119248312/229181284-446c6cb0-32e2-47e7-911c-917932f648fd.jpg",
+  "need_gpu": false,
+  "gpu": "preferred",
   "session_tags": [
     "deployed_owl_vit_object_detection"
   ],
   "community_agent": false,
-  "docker_image": "supervisely/base-py-sdk:6.70.7",
+  "docker_image": "supervisely/owl-vit_hf:1.0.0",
   "instance_version": "6.7.16",
   "entrypoint": "python -m uvicorn src.main:m.app --app-dir ./serve --host 0.0.0.0 --port 8000 --ws websockets",
   "port": 8000,
-  "task_location": "application_sessions"
+  "task_location": "application_sessions",
+  "license": {
+    "type": "Apache-2.0" 
+  }
 }
