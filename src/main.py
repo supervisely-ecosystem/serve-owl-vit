@@ -146,11 +146,6 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
                 box = box.cpu().detach().numpy()
                 # convert box coordinates from COCO to Supervisely format
                 box = [box[1], box[0], box[3], box[2]]
-                # ingore box if its width or height is greater than 95% of image width / height
-                if settings["ignore_big_bboxes"]:
-                    box_height, box_width = box[2] - box[0] + 1, box[3] - box[1] + 1
-                    if box_height > int(0.95 * img_height) or box_width > int(0.95 * img_width):
-                        continue
                 predictions.append(
                     sly.nn.PredictionBBox(class_name=class_name, bbox_tlbr=box, score=score.item())
                 )
