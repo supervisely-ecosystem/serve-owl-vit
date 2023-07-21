@@ -14,7 +14,7 @@ supervisely==6.72.68
 
 # To import Sinkhorn matcher:
 # jax
-# ott-jax==0.2.0
+ott-jax==0.2.0
 
 # code formatter
 # black
