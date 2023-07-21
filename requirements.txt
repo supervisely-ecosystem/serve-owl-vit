@@ -10,7 +10,7 @@ supervisely==6.72.68
 # tensorflow-datasets
 # scikit-image
 # bokeh
-# matplotlib
+matplotlib
 
 # To import Sinkhorn matcher:
 # jax
