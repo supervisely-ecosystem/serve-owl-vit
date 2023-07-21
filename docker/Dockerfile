@@ -31,6 +31,9 @@ COPY variables_large_14.npy /variables/
 
 COPY download.py /scenic/scenic/projects/baselines/clip/
 
+RUN apt-get install ffmpeg libgeos-dev libsm6 libxext6 libexiv2-dev libxrender-dev libboost-all-dev -y
+RUN pip install opencv-python
+
 # useful links:
 # https://hub.docker.com/r/samhitaalla/jax
 # https://github.com/google/jax/discussions/6338
