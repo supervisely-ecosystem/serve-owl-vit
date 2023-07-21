@@ -1,2 +1,2 @@
-docker build -t supervisely/owl-vit:1.0.1-ruslan . && \
-docker push supervisely/owl-vit:1.0.1-ruslan
+docker build -t supervisely/owl-vit-gpu:1.0.0 . && \
+docker push supervisely/owl-vit-gpu:1.0.0
