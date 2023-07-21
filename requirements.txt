@@ -12,8 +12,9 @@ bokeh
 matplotlib
 
 # To import Sinkhorn matcher:
-jax
+--find-links https://storage.googleapis.com/jax-releases/jax_releases.html
+jax[cuda12_local]
 ott-jax==0.2.0
 
-# # code formatter
+# code formatter
 black
