@@ -1,5 +1,5 @@
 supervisely==6.72.68
-cv2
+opencv-python==3.4.10.35
 
 # For CLIP:
 # torch>=1.10.2
