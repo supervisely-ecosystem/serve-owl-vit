@@ -2,8 +2,6 @@ FROM nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
 
 RUN apt update && apt install python3-pip -y
 
-RUN pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-
 RUN apt-get install -y git
 
 RUN git clone https://github.com/google-research/scenic.git
@@ -21,6 +19,8 @@ RUN pip3 install tensorflow
 RUN pip3 install tensorflow-datasets
 RUN pip3 install scikit-image
 RUN pip3 install bokeh
+
+RUN pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 RUN python3 -m pip install supervisely==6.72.68
 
