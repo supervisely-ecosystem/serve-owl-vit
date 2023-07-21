@@ -1,8 +1,8 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:12.0.1-cudnn8-devel-ubuntu22.04
 
 RUN apt update && apt install python3-pip -y
 
-RUN pip install "jax[cuda11_cudnn86]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+RUN pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 RUN apt-get install -y git
 
