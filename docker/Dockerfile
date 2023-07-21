@@ -30,3 +30,8 @@ COPY variables_base_16.npy /variables/
 COPY variables_large_14.npy /variables/
 
 COPY download.py /scenic/scenic/projects/baselines/clip/
+
+# useful links:
+# https://hub.docker.com/r/samhitaalla/jax
+# https://github.com/google/jax/discussions/6338
+# https://github.com/google/jax/issues/6340
