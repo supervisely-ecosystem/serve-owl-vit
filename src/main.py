@@ -13,6 +13,7 @@ except ImportError:
 from typing import List, Any, Dict
 from dotenv import load_dotenv
 import os
+os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
 from pathlib import Path
 
 app_root_directory = str(Path(__file__).parent.absolute().parents[0])
