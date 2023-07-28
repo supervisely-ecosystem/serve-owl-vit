@@ -24,6 +24,10 @@
 
 OWL-ViT is an object detection neural network trained on a variety of image - text pairs, which demonstrates outstanding performance on zero-shot text-conditioned and one-shot image-conditioned object detection. It can be used in text prompt mode to detect objects described in text queries or in reference image mode to detect object which was framed by a bounding box on a reference image.
 
+🔥🔥🔥 Check out our [youtube tutorial](https://youtu.be/PnhAsG-GFHo) and the [complete guide in our blog](https://supervisely.com/blog/owl-vit/):   
+
+<a href="https://youtu.be/PnhAsG-GFHo" target="_blank"><img src="https://github.com/supervisely-ecosystem/serve-owl-vit/assets/12828725/f1a3589a-2c4d-4467-a2dc-077f56422a98"/></a>
+
 ## How To Run
 
 **Pretrained models**
