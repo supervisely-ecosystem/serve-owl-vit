@@ -1,4 +1,5 @@
-supervisely==6.72.68
+# supervisely==6.72.68
+git+https://github.com/supervisely/supervisely.git@fix-serving-model-download-progress
 
 # For CLIP:
 torch>=1.10.2
