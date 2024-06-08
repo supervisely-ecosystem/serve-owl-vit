@@ -9,6 +9,7 @@ RUN pip3 install --upgrade pip
 RUN git clone https://github.com/google-research/scenic.git
 WORKDIR /scenic
 RUN git checkout 01b082706e7304e699baaa1bf4d15dcbf4d52de2
+RUN python3 -m pip install git+https://github.com/google-deepmind/optax.git@main
 RUN python3 -m pip install -vq .
 WORKDIR /
 COPY requirements.txt /tmp/requirements.txt
