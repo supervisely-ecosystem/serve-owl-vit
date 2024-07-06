@@ -1,4 +1,4 @@
-supervisely==6.73.119
+supervisely==6.73.124
 
 # For CLIP:
 torch>=1.10.2
