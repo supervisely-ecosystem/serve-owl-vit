@@ -2,10 +2,14 @@ FROM supervisely/base-py-sdk:6.73.139 as base_py_sdk
 ENV DEBIAN_FRONTEND=noninteractive
 ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
 
-FROM python:3.9-slim
-COPY --from=base_py_sdk /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.9/site-packages
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3.9-venv
 
-RUN apt-get update
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
 RUN apt-get install -y git
 
 RUN pip3 install --upgrade pip
@@ -31,8 +35,6 @@ RUN pip3 install matplotlib==3.3.
 # To import Sinkhorn matcher:
 RUN pip3 install jax==0.4.27
 RUN pip3 install ott-jax==0.2.0
-
-# RUN pip3 install supervisely==6.73.141
 
 RUN mkdir -p variables
 COPY --from=supervisely/owl-vit:1.0.1 /variables/variables_base_32.npy /variables/variables_base_32.npy
