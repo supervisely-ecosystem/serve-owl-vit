@@ -1,12 +1,12 @@
-FROM supervisely/base-py-sdk:6.73.139
+FROM supervisely/base-py-sdk:6.73.139 as base_py_sdk
 ENV DEBIAN_FRONTEND=noninteractive
 ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
 
+FROM python:3.9-slim
+COPY --from=base_py_sdk /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.9/site-packages
+
 RUN apt-get update
 RUN apt-get install -y git
-RUN apt-get install -y python3.9 python3-pip
-RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 RUN pip3 install --upgrade pip
 RUN git clone https://github.com/google-research/scenic.git
