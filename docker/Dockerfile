@@ -5,6 +5,8 @@ ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
 RUN apt-get update
 RUN apt-get install -y git
 RUN apt-get install -y python3.9 python3-pip
+RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 RUN pip3 install --upgrade pip
 RUN git clone https://github.com/google-research/scenic.git
