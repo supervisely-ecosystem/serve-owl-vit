@@ -8,7 +8,8 @@ RUN apt-get install -y git
 RUN pip3 install --upgrade pip
 RUN git clone https://github.com/google-research/scenic.git
 WORKDIR /scenic
-RUN git checkout 01b082706e7304e699baaa1bf4d15dcbf4d52de2
+# RUN git checkout 01b082706e7304e699baaa1bf4d15dcbf4d52de2
+RUN git checkout f1babc22c18a4b23e2ecef82f2cf766438dfdb5e
 RUN python3 -m pip install chex==0.1.7 optax==0.1.5
 RUN python3 -m pip install -vq .
 WORKDIR /
