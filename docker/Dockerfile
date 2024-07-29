@@ -47,3 +47,4 @@ RUN pip3 install matplotlib==3.3.
 RUN pip3 install jax==0.4.13
 RUN pip3 install ott-jax==0.2.0
 
+RUN pip3 install supervisely==6.73.139
