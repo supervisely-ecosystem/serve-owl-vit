@@ -51,8 +51,8 @@ RUN pip3 install ott-jax==0.2.0
 RUN pip3 install supervisely==6.73.139
 
 RUN mkdir -p variables
-COPY --from=supervisely/owl-vit:1.0.1 /variables/variables_base_32.npy /variables/variables_base_32.npy
-COPY --from=supervisely/owl-vit:1.0.1 /variables/variables_base_16.npy /variables/variables_base_16.npy
-COPY --from=supervisely/owl-vit:1.0.1 /variables/variables_large_14.npy /variables/variables_large_14.npy
+COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_32.npy /variables/variables_base_32.npy
+COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_16.npy /variables/variables_base_16.npy
+COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_large_14.npy /variables/variables_large_14.npy
 
 COPY download.py /scenic/scenic/projects/baselines/clip/
