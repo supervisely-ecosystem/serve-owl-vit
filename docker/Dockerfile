@@ -44,6 +44,7 @@ RUN pip3 install bokeh==3.1.1
 RUN pip3 install matplotlib==3.3.
 
 # To import Sinkhorn matcher:
+RUN pip3 install jaxlib==0.4.11
 RUN pip3 install jax==0.4.13
 RUN pip3 install ott-jax==0.2.0
 
