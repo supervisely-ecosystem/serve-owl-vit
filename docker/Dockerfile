@@ -30,7 +30,7 @@
 
 FROM supervisely/owl-vit:1.0.1-ruslan
 
-RUN pip install --upgrade setuptools==70.3.0
+RUN pip install --upgrade setuptools==69.5.1
 
 # For CLIP:
 RUN pip3 install torch==1.10.2
