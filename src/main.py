@@ -139,13 +139,14 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             # get reference image and coordinates of its bbox
             reference_image_id = settings["reference_image_id"]
             from requests.exceptions import HTTPError
-            from supervisely.app.exceptions import show_dialog
+            # from supervisely.app.exceptions import show_dialog
             assert isinstance(reference_image_id, int), f"Reference Image ID must be an integer. Reference Image ID: {reference_image_id}"
             try:
                 reference_image = api.image.download_np(id=reference_image_id)
             except HTTPError:
-                show_dialog(title='Error Generating Predictions', description=f'Image with reference id "{reference_image_id}" could not be downloaded. This might be due to connection problems or invalid input data. Message: {reference_image}', status='error')
-                raise
+                error_msg = f'Reference Image (id: {reference_image_id}) could not be downloaded. This might be due to connection problems or invalid request. Message: "{reference_image}"'
+                # show_dialog(title='Error Generating Predictions', description=error_msg, status='error')
+                raise HTTPError(error_msg)
             ref_img_height, ref_img_width = reference_image.shape[:2]
             bbox_coordinates = settings["reference_bbox"]
             class_name = settings["reference_class_name"]
