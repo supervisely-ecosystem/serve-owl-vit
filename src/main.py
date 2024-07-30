@@ -144,9 +144,11 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             try:
                 reference_image = api.image.download_np(id=reference_image_id)
             except HTTPError:
-                error_msg = f'Reference Image (id: {reference_image_id}) could not be downloaded. This might be due to connection problems or invalid request. Message: "{reference_image}"'
+                error_msg = f'Reference Image (id: {reference_image_id}) could not be downloaded. This might be due to connection problems or invalid request.'
+                sly.logger.warning(error_msg)
                 # show_dialog(title='Error Generating Predictions', description=error_msg, status='error')
-                raise HTTPError(error_msg)
+                # raise HTTPError(error_msg)
+                return []
             ref_img_height, ref_img_width = reference_image.shape[:2]
             bbox_coordinates = settings["reference_bbox"]
             class_name = settings["reference_class_name"]
