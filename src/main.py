@@ -137,7 +137,9 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
             self._model_meta = self.model_meta
         if settings["mode"] == "reference_image":
             # get reference image and coordinates of its bbox
-            reference_image = api.image.download_np(id=settings["reference_image_id"])
+            reference_image_id = settings["reference_image_id"]
+            assert isinstance(reference_image_id, int), f"Reference Image ID must be an integer. Reference Image ID: {reference_image_id}"
+            reference_image = api.image.download_np(id=reference_image_id)
             ref_img_height, ref_img_width = reference_image.shape[:2]
             bbox_coordinates = settings["reference_bbox"]
             class_name = settings["reference_class_name"]
