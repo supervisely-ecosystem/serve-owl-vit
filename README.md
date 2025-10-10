@@ -11,7 +11,7 @@
   <a href="#Acknowledgment">Acknowledgment</a>
 </p>
 
-[![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](https://ecosystem.supervisely.com/apps/supervisely-ecosystem/serve-owl-vit)
+[![](https://img.shields.io/badge/supervisely-ecosystem-brightgreen)](../../../../supervisely-ecosystem/serve-owl-vit)
 [![](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://supervisely.com/slack)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/supervisely-ecosystem/serve-owl-vit)
 [![views](https://app.supervisely.com/img/badges/views/supervisely-ecosystem/serve-owl-vit.png)](https://supervisely.com)
@@ -64,10 +64,10 @@ https://user-images.githubusercontent.com/115161827/229866632-9fd8d245-d1a5-454b
 
 You can use deployed model in the following Supervisely Applications ⬇️ 
     
-- [NN Image Labeling](https://ecosystem.supervisely.com/apps/supervisely-ecosystem%252Fnn-image-labeling%252Fannotation-tool) - integrate any deployed NN to Supervisely Image Labeling UI. Configure inference settings and model output classes. Press `Apply` button (or use hotkey) and detections with their confidences will immediately appear on the image.   
+- [NN Image Labeling](../../../../supervisely-ecosystem/supervisely-ecosystem%252Fnn-image-labeling%252Fannotation-tool) - integrate any deployed NN to Supervisely Image Labeling UI. Configure inference settings and model output classes. Press `Apply` button (or use hotkey) and detections with their confidences will immediately appear on the image.   
     <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/nn-image-labeling/annotation-tool" src="https://i.imgur.com/hYEucNt.png" height="70px" margin-bottom="20px"/>
     
-- [Apply Owl-ViT to Images Project](https://ecosystem.supervisely.com/apps/apply-owl-vit-to-images-project) - app allows to apply OWL-ViT model directly to images project with graphical user interface
+- [Apply Owl-ViT to Images Project](../../../../supervisely-ecosystem/apply-owl-vit-to-images-project) - app allows to apply OWL-ViT model directly to images project with graphical user interface
     
     <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/apply-owl-vit-to-images-project" src="https://user-images.githubusercontent.com/115161827/230896644-0ddb3a30-26bf-4468-b1fe-1bfc1d84a3f6.png" height="70px" margin-bottom="20px"/>
     
