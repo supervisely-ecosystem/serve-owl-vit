@@ -48,7 +48,7 @@ RUN pip3 install jaxlib==0.4.11
 RUN pip3 install jax==0.4.13
 RUN pip3 install ott-jax==0.2.0
 
-RUN pip3 install supervisely==6.73.139
+RUN pip3 install supervisely==6.73.486
 
 RUN mkdir -p variables
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_32.npy /variables/variables_base_32.npy
@@ -56,3 +56,5 @@ COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_16.npy /v
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_large_14.npy /variables/variables_large_14.npy
 
 COPY download.py /scenic/scenic/projects/baselines/clip/
+
+LABEL python_sdk_version="6.73.486"
