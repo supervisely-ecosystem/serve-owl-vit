@@ -38,6 +38,13 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 
 class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not hasattr(self, "class_names") or not self.class_names:
+            self.class_names = ["object"]
+        if not hasattr(self, "box_colors") or self.box_colors is None:
+            self.box_colors = []
+
     def add_content_to_custom_tab(self, gui):
         self.select_model_type = RadioGroup(
             items=[
@@ -56,6 +63,8 @@ class OWLViTModel(sly.nn.inference.PromptBasedObjectDetection):
 
     @property
     def model_meta(self):
+        if not hasattr(self, "class_names") or not self.class_names:
+            self.class_names = ["object"]
         if self._model_meta is None:
             self._model_meta = sly.ProjectMeta(
                 [sly.ObjClass(self.class_names[0], sly.Rectangle, [255, 0, 0])]
