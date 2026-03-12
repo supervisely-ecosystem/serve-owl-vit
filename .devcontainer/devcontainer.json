@@ -1,0 +1,22 @@
+{
+    "name": "OWLVitDevContainer",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.black-formatter"
+            ]
+        }
+    },
+    "runArgs": [
+        "--gpus",
+        "all",
+        "--ipc=host",
+        "--cap-add",
+        "NET_ADMIN",
+        "--runtime=nvidia"
+    ]
+}
