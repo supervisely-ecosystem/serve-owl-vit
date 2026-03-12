@@ -44,9 +44,8 @@ RUN pip3 install bokeh==3.1.1
 RUN pip3 install matplotlib==3.3.
 
 # To import Sinkhorn matcher:
-RUN pip3 install jaxlib==0.4.11
-RUN pip3 install jax==0.4.13
-RUN pip3 install ott-jax==0.2.0
+RUN pip3 install jaxlib==0.4.13 jax==0.4.13 -f https://storage.googleapis.com/jax-releases/jax_releases.html && \
+    pip3 install ott-jax==0.2.0
 
 RUN pip3 install supervisely==6.73.486
 
@@ -55,6 +54,14 @@ COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_32.npy /v
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_16.npy /variables/variables_base_16.npy
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_large_14.npy /variables/variables_large_14.npy
 
-COPY download.py /scenic/scenic/projects/baselines/clip/
+COPY download.py /usr/local/lib/python3.8/dist-packages/scenic/projects/baselines/clip/download.py
+
+# Pre-download the CLIP BPE vocabulary file to avoid HTTP 429 rate-limit errors at runtime
+RUN mkdir -p /root/.cache/scenic/clip && \
+    wget -q "https://openaipublic.blob.core.windows.net/clip/bpe_simple_vocab_16e6.txt.gz" -O /root/.cache/scenic/clip/bpe_simple_vocab_16e6.txt.gz || \
+    wget -q "https://huggingface.co/spaces/LanguageBind/LanguageBind/resolve/main/open_clip/bpe_simple_vocab_16e6.txt.gz" -O /root/.cache/scenic/clip/bpe_simple_vocab_16e6.txt.gz
+
+# Redirect CUDA JIT cache to a persistent-friendly path so it survives container restarts
+ENV CUDA_CACHE_PATH=/agent-storage/.nv/ComputeCache
 
 LABEL python_sdk_version="6.73.486"
