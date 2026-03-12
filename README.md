@@ -1,5 +1,5 @@
 <div align="center" markdown>
-<img src="https://user-images.githubusercontent.com/119248312/229181284-446c6cb0-32e2-47e7-911c-917932f648fd.jpg"/>  
+<img src="https://user-images.githubusercontent.com/119248312/229181284-446c6cb0-32e2-47e7-911c-917932f648fd.jpg"/>
 
 # Serve OWL-ViT
 
@@ -19,12 +19,11 @@
 
 </div>
 
-
 ## Overview
 
 OWL-ViT is an object detection neural network trained on a variety of image - text pairs, which demonstrates outstanding performance on zero-shot text-conditioned and one-shot image-conditioned object detection. It can be used in text prompt mode to detect objects described in text queries or in reference image mode to detect object which was framed by a bounding box on a reference image.
 
-🔥🔥🔥 Check out our [youtube tutorial](https://youtu.be/PnhAsG-GFHo) and the [complete guide in our blog](https://supervisely.com/blog/owl-vit/):   
+🔥🔥🔥 Check out our [youtube tutorial](https://youtu.be/PnhAsG-GFHo) and the [complete guide in our blog](https://supervisely.com/blog/owl-vit/):
 
 <a href="https://youtu.be/PnhAsG-GFHo" target="_blank"><img src="https://github.com/supervisely-ecosystem/serve-owl-vit/assets/12828725/f1a3589a-2c4d-4467-a2dc-077f56422a98"/></a>
 
@@ -39,6 +38,11 @@ OWL-ViT is an object detection neural network trained on a variety of image - te
 **Step 2.** Wait for the model to deploy:
 
 <img src="https://user-images.githubusercontent.com/91027877/229936905-33153fca-5251-4f75-98f2-117f0d3890b3.png" width="80%"/>
+
+> **⚠️ Note for NVIDIA Blackwell GPUs (compute capability 12.0, e.g. RTX 5000 series):**  
+> The first model deployment may take **15–30 minutes** due to JIT-compilation of CUDA kernels, which is required because TensorFlow does not include prebuilt binaries for this GPU architecture.  
+> The compiled kernels are cached on the agent, so subsequent deployments on the same agent will start normally.  
+> If the model does not deploy after 30 minutes, please contact support.
 
 **Custom models**
 
@@ -62,18 +66,17 @@ https://user-images.githubusercontent.com/115161827/229866632-9fd8d245-d1a5-454b
 
 ## Related Apps
 
-You can use deployed model in the following Supervisely Applications ⬇️ 
-    
-- [NN Image Labeling](https://ecosystem.supervisely.com/apps/supervisely-ecosystem%252Fnn-image-labeling%252Fannotation-tool) - integrate any deployed NN to Supervisely Image Labeling UI. Configure inference settings and model output classes. Press `Apply` button (or use hotkey) and detections with their confidences will immediately appear on the image.   
-    <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/nn-image-labeling/annotation-tool" src="https://i.imgur.com/hYEucNt.png" height="70px" margin-bottom="20px"/>
-    
+You can use deployed model in the following Supervisely Applications ⬇️
+
+- [NN Image Labeling](https://ecosystem.supervisely.com/apps/supervisely-ecosystem%252Fnn-image-labeling%252Fannotation-tool) - integrate any deployed NN to Supervisely Image Labeling UI. Configure inference settings and model output classes. Press `Apply` button (or use hotkey) and detections with their confidences will immediately appear on the image.  
+   <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/nn-image-labeling/annotation-tool" src="https://i.imgur.com/hYEucNt.png" height="70px" margin-bottom="20px"/>
 - [Apply Owl-ViT to Images Project](https://ecosystem.supervisely.com/apps/apply-owl-vit-to-images-project) - app allows to apply OWL-ViT model directly to images project with graphical user interface
-    
     <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/apply-owl-vit-to-images-project" src="https://user-images.githubusercontent.com/115161827/230896644-0ddb3a30-26bf-4468-b1fe-1bfc1d84a3f6.png" height="70px" margin-bottom="20px"/>
-    
+
+
 ## Acknowledgment
 
-This app is based on the model `OWL-ViT`. 
+This app is based on the model `OWL-ViT`.
 
 - Check it out on [github](https://github.com/google-research/scenic/tree/main/scenic/projects/owl_vit). ![GitHub Org's stars](https://img.shields.io/github/stars/google-research/scenic?style=social) <br>
 - [Paper](https://arxiv.org/abs/2205.06230)

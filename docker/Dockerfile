@@ -62,6 +62,6 @@ RUN mkdir -p /root/.cache/scenic/clip && \
     wget -q "https://huggingface.co/spaces/LanguageBind/LanguageBind/resolve/main/open_clip/bpe_simple_vocab_16e6.txt.gz" -O /root/.cache/scenic/clip/bpe_simple_vocab_16e6.txt.gz
 
 # Redirect CUDA JIT cache to a persistent-friendly path so it survives container restarts
-ENV CUDA_CACHE_PATH=/app/.nv/ComputeCache
+ENV CUDA_CACHE_PATH=/agent-storage/.nv/ComputeCache
 
 LABEL python_sdk_version="6.73.486"
