@@ -17,7 +17,7 @@
   "gpu": "preferred",
   "session_tags": ["deployed_owl_vit_object_detection"],
   "community_agent": false,
-  "docker_image": "supervisely/owl-vit:1.0.8",
+  "docker_image": "supervisely/owl-vit:1.0.8-dev",
   "instance_version": "6.15.35",
   "entrypoint": "python -m uvicorn src.main:m.app --app-dir ./serve --host 0.0.0.0 --port 8000 --ws websockets",
   "port": 8000,
