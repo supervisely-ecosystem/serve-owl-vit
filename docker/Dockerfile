@@ -54,7 +54,7 @@ COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_32.npy /v
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_base_16.npy /variables/variables_base_16.npy
 COPY --from=supervisely/owl-vit:1.0.1-ruslan /variables/variables_large_14.npy /variables/variables_large_14.npy
 
-COPY download.py /scenic/scenic/projects/baselines/clip/
+COPY download.py /usr/local/lib/python3.8/dist-packages/scenic/projects/baselines/clip/download.py
 
 # Pre-download the CLIP BPE vocabulary file to avoid HTTP 429 rate-limit errors at runtime
 RUN mkdir -p /root/.cache/scenic/clip && \

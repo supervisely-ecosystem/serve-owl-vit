@@ -50,19 +50,17 @@ def download(url: str, root: str = DEFAULT_DOWNLOAD_DIR, expected_sha256: Option
                 "%s exists, but the SHA256 checksum does not match;" "re-downloading the file",
                 download_target,
             )
+        else:
+            return download_target
 
     temp_file = tempfile.NamedTemporaryFile(delete=False).name
     with gfile.GFile(temp_file, "wb") as output:
         with urllib.request.urlopen(url) as source:
-            # loop = tqdm.tqdm(total=int(source.info().get('Content-Length')),
-            #  ncols=80, unit='iB', unit_scale=True, unit_divisor=1024)
             while True:
                 buffer = source.read(8192)
                 if not buffer:
                     break
-
                 output.write(buffer)
-                # loop.update(len(buffer))
 
     if expected_sha256 and hash_file(temp_file) != expected_sha256:
         raise RuntimeError("Model has been downloaded but the SHA256 checksum does not not match")
