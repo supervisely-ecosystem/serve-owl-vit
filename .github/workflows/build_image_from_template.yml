@@ -28,11 +28,12 @@ on:
 
 jobs:
   build-image:
-    uses: supervisely-ecosystem/workflows/.github/workflows/build_image_from_template.yml@master
+    uses: supervisely-ecosystem/workflows/.github/workflows/build_image_from_template.yml@hdi
     with:
       image_name: "owl-vit"
       tag_version: "${{ inputs.tag_version }}"
       tag_ref_name: "${{ inputs.tag_ref_name }}"
+      workflows_ref: "hdi"
       dockerfile_template_path: "docker/Dockerfile.tmpl"
       cve_checks: ${{ inputs.enable_cve_checks }}
       skip_tag_check: ${{ inputs.skip_tag_check }}
