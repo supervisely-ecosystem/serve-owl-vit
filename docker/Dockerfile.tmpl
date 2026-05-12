@@ -34,6 +34,7 @@ RUN set -eux; \
   python3 -m venv --system-site-packages /opt/venv; \
   /opt/venv/bin/python -m ensurepip --upgrade; \
   /opt/venv/bin/python -m pip install --no-cache-dir --upgrade pip wheel setuptools; \
+  /opt/venv/bin/python -m pip download --no-cache-dir --only-binary=:all: --dest /tmp/wheels pip==25.0.1; \
   if [ -s /tmp/requirements.txt ]; then \
     /opt/venv/bin/python -m pip wheel --no-cache-dir -r /tmp/requirements.txt -w /tmp/wheels; \
   else \
@@ -64,6 +65,7 @@ RUN --mount=from=requirements-builder,source=/tmp/wheels,target=/tmp/wheels,ro \
   python3 -m venv --system-site-packages /opt/venv; \
   if [ -s /tmp/requirements.txt ]; then \
     /opt/venv/bin/python -m ensurepip --upgrade; \
+    /opt/venv/bin/python -m pip install --no-cache-dir --no-index --find-links=/tmp/wheels --upgrade pip==25.0.1; \
     set -- /tmp/wheels/*.whl; \
     if [ -e "$1" ]; then \
       /opt/venv/bin/python -m pip install --no-cache-dir --no-compile --no-index /tmp/wheels/*.whl; \
