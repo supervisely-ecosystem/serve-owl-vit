@@ -1,0 +1,126 @@
+ARG tag_ref_name
+ARG REQUIREMENTS_FILE=dev_requirements.txt
+ARG RUNTIME_BASE_IMAGE=""
+ARG EXTRA_BUILDER_LIBS=""
+
+FROM supervisely/owl-vit:1.0.1-ruslan AS owl-vit-base
+
+FROM owl-vit-base AS requirements-builder
+
+ENV LANG=C.UTF-8 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONUNBUFFERED=1 \
+  PIP_DISABLE_PIP_VERSION_CHECK=1 \
+  PIP_NO_CACHE_DIR=1 \
+  PIP_PREFER_BINARY=1 \
+  XLA_PYTHON_CLIENT_PREALLOCATE=false \
+  CUDA_CACHE_PATH=/agent-storage/.nv/ComputeCache
+
+ARG REQUIREMENTS_FILE
+ARG EXTRA_BUILDER_LIBS
+RUN set -eux; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    git \
+    python3-venv \
+    ${EXTRA_BUILDER_LIBS}; \
+  rm -rf /var/lib/apt/lists/*
+
+COPY ${REQUIREMENTS_FILE} /tmp/requirements.txt
+
+RUN set -eux; \
+  python3 -m venv --system-site-packages /opt/venv; \
+  /opt/venv/bin/python -m ensurepip --upgrade; \
+  /opt/venv/bin/python -m pip install --no-cache-dir --upgrade pip wheel setuptools; \
+  if [ -s /tmp/requirements.txt ]; then \
+    /opt/venv/bin/python -m pip wheel --no-cache-dir -r /tmp/requirements.txt -w /tmp/wheels; \
+  else \
+    mkdir -p /tmp/wheels; \
+  fi
+
+FROM owl-vit-base AS runtime
+
+ENV LANG=C.UTF-8 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    XLA_PYTHON_CLIENT_PREALLOCATE=false \
+    CUDA_CACHE_PATH=/agent-storage/.nv/ComputeCache
+
+ARG tag_ref_name
+ARG REQUIREMENTS_FILE
+ARG CACHEBUST=""
+
+COPY ${REQUIREMENTS_FILE} /tmp/requirements.txt
+
+RUN --mount=from=requirements-builder,source=/tmp/wheels,target=/tmp/wheels,ro \
+  set -eux; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    ca-certificates \
+    python3-venv \
+    wget; \
+  python3 -m venv --system-site-packages /opt/venv; \
+  if [ -s /tmp/requirements.txt ]; then \
+    /opt/venv/bin/python -m ensurepip --upgrade; \
+    set -- /tmp/wheels/*.whl; \
+    if [ -e "$1" ]; then \
+      /opt/venv/bin/python -m pip install --no-cache-dir --no-compile --no-index /tmp/wheels/*.whl; \
+      rm -rf \
+        /opt/venv/lib/python*/site-packages/pip* \
+        /opt/venv/lib/python*/site-packages/setuptools* \
+        /opt/venv/lib/python*/site-packages/wheel* \
+        /opt/venv/lib/python*/site-packages/pkg_resources* \
+        /opt/venv/lib/python*/site-packages/_distutils_hack* \
+        /opt/venv/lib/python*/site-packages/_distutils* \
+        /opt/venv/lib/python*/site-packages/distutils-precedence.pth \
+        /opt/venv/bin/pip \
+        /opt/venv/bin/pip3 \
+        /opt/venv/bin/pip3.* \
+        /opt/venv/bin/easy_install \
+        /opt/venv/bin/easy_install-* \
+        /opt/venv/bin/wheel; \
+    fi; \
+  fi; \
+  rm -rf \
+    /var/lib/apt/lists/* \
+    /usr/bin/apt \
+    /usr/bin/apt-get \
+    /usr/bin/apt-cache \
+    /usr/bin/apt-mark \
+    /usr/bin/apt-key \
+    /usr/bin/dpkg \
+    /usr/bin/dpkg-deb \
+    /usr/bin/dpkg-query \
+    /usr/bin/dpkg-divert \
+    /usr/bin/git \
+    /usr/bin/curl; \
+  find /opt/venv -type d -name '__pycache__' -prune -exec rm -rf {} +; \
+  find /opt/venv -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete; \
+  find /opt/venv/lib/python*/site-packages -type d \( -name 'tests' -o -name 'test' \) -prune -exec rm -rf {} +; \
+  rm -rf /tmp/requirements.txt
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN mkdir -p /variables
+COPY --from=owl-vit-base /variables/variables_base_32.npy /variables/variables_base_32.npy
+COPY --from=owl-vit-base /variables/variables_base_16.npy /variables/variables_base_16.npy
+COPY --from=owl-vit-base /variables/variables_large_14.npy /variables/variables_large_14.npy
+
+COPY download.py /tmp/download.py
+
+RUN set -eux; \
+  cp /tmp/download.py "$(/opt/venv/bin/python -c 'from pathlib import Path; import scenic; print(Path(scenic.__file__).parent / "projects" / "baselines" / "clip" / "download.py")')"; \
+  rm /tmp/download.py; \
+  mkdir -p /root/.cache/scenic/clip; \
+  (wget -q "https://openaipublic.blob.core.windows.net/clip/bpe_simple_vocab_16e6.txt.gz" -O /root/.cache/scenic/clip/bpe_simple_vocab_16e6.txt.gz \
+    || wget -q "https://huggingface.co/spaces/LanguageBind/LanguageBind/resolve/main/open_clip/bpe_simple_vocab_16e6.txt.gz" -O /root/.cache/scenic/clip/bpe_simple_vocab_16e6.txt.gz); \
+  rm -f /usr/bin/wget; \
+  find /usr/local -type d -name "__pycache__" -prune -exec rm -rf {} +; \
+  find /usr/local -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete; \
+  find /opt/venv -type d -name "__pycache__" -prune -exec rm -rf {} +; \
+  find /opt/venv -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete; \
+  rm -rf /var/cache/apt /var/lib/apt/lists /var/log/*
+
+LABEL python_sdk_version="${tag_ref_name}"

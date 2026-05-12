@@ -1,0 +1,15 @@
+setuptools==69.5.1
+torch==1.10.2
+git+https://github.com/openai/CLIP.git
+ml_collections==0.1.1
+clu==0.0.9
+tensorflow==2.12.0
+tensorflow-datasets==4.9.2
+scikit-image==0.17.1
+bokeh==3.1.1
+matplotlib==3.3.0
+--find-links https://storage.googleapis.com/jax-releases/jax_releases.html
+jaxlib==0.4.13
+jax==0.4.13
+ott-jax==0.2.0
+supervisely==6.73.567
