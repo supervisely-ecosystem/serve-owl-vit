@@ -1,5 +1,4 @@
 setuptools==69.5.1
-torch==1.10.2
 git+https://github.com/openai/CLIP.git
 ml_collections==0.1.1
 clu==0.0.9

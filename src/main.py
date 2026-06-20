@@ -20,7 +20,6 @@ import sys
 
 sys.path.append(os.path.join(app_root_directory, "scenic"))
 
-import torch
 import tensorflow as tf
 from scenic.projects.owl_vit.configs import clip_b16, clip_b32, clip_l14
 from scenic.projects.owl_vit import models
@@ -286,7 +285,7 @@ m = OWLViTModel(
 if sly.is_production():
     m.serve()
 else:
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda" if tf.config.list_physical_devices("GPU") else "cpu"
     print("Using device:", device)
     m.load_on_device(m.model_dir, device)
     image_path = "./demo_data/image_01.jpg"
