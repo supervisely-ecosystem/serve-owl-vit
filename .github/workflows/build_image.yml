@@ -1,26 +1,40 @@
-name: Docker Image Build
+name: Manual Build App Image From Template
+run-name: Manual Build App Image for "${{ github.event.repository.name }}"
 
 on:
   workflow_dispatch:
     inputs:
       tag_version:
-        description: 'Docker Image Tag (without "v")'
-        required: true
-        type: string
-      sdk_version:
-        description: "Supervisely SDK version (optional) - only needed if SDK is installed from branch"
+        description: "Tag version to build image for"
         required: false
-        type: string
-        default: ""
+      tag_ref_name:
+        description: "Runtime base image tag/ref to use; defaults to tag_version"
+        required: false
+      enable_cve_checks:
+        description: "Enable CVE checks during image build"
+        required: false
+        type: boolean
+        default: true
+      skip_tag_check:
+        description: "Skip tag existence check before building image"
+        required: false
+        type: boolean
+        default: false
+      no_cache_requirements:
+        description: "Do not use cache for installing requirements"
+        required: false
+        type: boolean
+        default: true
 
 jobs:
-  docker-build-and-push:
-    uses: supervisely-ecosystem/workflows/.github/workflows/build_image.yml@master
-    secrets:
-      DOCKERHUB_USERNAME: "${{  secrets.DOCKERHUB_USERNAME  }}"
-      DOCKERHUB_TOKEN: "${{  secrets.DOCKERHUB_TOKEN  }}"
+  build-image:
+    uses: supervisely-ecosystem/workflows/.github/workflows/build_image_from_template.yml@hdi
     with:
-      tag_version: ${{ github.event.inputs.tag_version }}
-      dockerfile_path: docker/Dockerfile
-      image_name: "owl-vit" # <- optional, if not set, will be equal to repository name
-      sdk_version: ${{ github.event.inputs.sdk_version }}
+      image_name: "owl-vit"
+      tag_version: "${{ inputs.tag_version }}"
+      tag_ref_name: "${{ inputs.tag_ref_name }}"
+      workflows_ref: "hdi"
+      dockerfile_template_path: "docker/Dockerfile.tmpl"
+      cve_checks: ${{ inputs.enable_cve_checks }}
+      skip_tag_check: ${{ inputs.skip_tag_check }}
+      no_cache_requirements: ${{ inputs.no_cache_requirements }}
